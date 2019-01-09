@@ -17,14 +17,7 @@ public class HomeController {
     }
 
     @RequestMapping("/contact")
-    public String showContact() {
-        return "contact";
-    }
-
-    @RequestMapping("/stores")
-    public String showStores() {
-        return "stores";
-    }
+    public String showContact() { return "contact"; }
 
     @RequestMapping("/shops")
     public String showShops() {
