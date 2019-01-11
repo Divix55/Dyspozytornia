@@ -29,26 +29,26 @@
 
                 <j:if test="${sessionScope.user!=null}">
                     <li class="nav-item">
-                        <a class="nav-link" href="/stores"> Magazyny </a>
+                        <a class="nav-link" href="<j:url value="/stores"/>"> Magazyny </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/shops"> Punkty </a>
+                        <a class="nav-link" href="<j:url value="/shops"/>"> Punkty </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/supply"> Dostawy </a>
+                        <a class="nav-link" href="<j:url value="/supply"/>"> Dostawy </a>
                     </li>
                     <j:if test="${sessionScope.userPrivileges==1}">
                         <li class="nav-item">
-                            <a class="nav-link" href="/account"> Moje konto </a>
+                            <a class="nav-link" href="<j:url value="/account"/>"> Moje konto </a>
                         </li>
                     </j:if>
                     <j:if test="${sessionScope.userPrivileges==2}">
                         <li class="nav-item">
-                            <a class="nav-link" href="/admin-panel"> Panel administracyjny </a>
+                            <a class="nav-link" href="<j:url value="/admin-panel"/>"> Panel administracyjny </a>
                         </li>
                     </j:if>
                     <li class="nav-item">
-                        <a class="nav-link" href="/logout"> Wyloguj </a>
+                        <a class="nav-link" href="<j:url value="/logout"/>"> Wyloguj </a>
                     </li>
                 </j:if>
 
