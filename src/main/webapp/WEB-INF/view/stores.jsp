@@ -20,7 +20,9 @@
                     </tr>
                     ${mapPointerFill}
                 </table>
+                <j:if test="${sessionScope.userPrivileges==2}">
                 <a href="<j:url value="/mapPointerRegister"/>"><p>Zarejestruj punkt</p></a>
+                </j:if>
             </div>
         </div>
     </section>
