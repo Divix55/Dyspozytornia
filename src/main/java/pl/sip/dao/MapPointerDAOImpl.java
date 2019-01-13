@@ -55,6 +55,36 @@ public class MapPointerDAOImpl implements MapPointerDAO {
         return listOfPointers;
     }
 
+    public void createMapPointer(NewMapPointer mapPointer, String typeOfPoint) {
+        String sql = "";
+        if (typeOfPoint == "Stores") {
+            sql = "Insert into Stores (Name, Longitude, Latitude)" + "values(?, ?, ?)";
+        } else if (typeOfPoint == "Shops"){
+            sql = "Insert into Shops (Name, Longitude, Latitude)" + "values(?, ?, ?)";
+        }
+        Connection connection = null;
+
+        try {
+            connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, mapPointer.getPointName());
+            preparedStatement.setDouble(2, mapPointer.getPointLongitude());
+            preparedStatement.setDouble(3, mapPointer.getPointLatitude());
+            preparedStatement.execute();
+            connection.close();
+        } catch (SQLException e){
+            throw new RuntimeException(e);
+        } finally {
+            if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException e){
+                    System.out.print("Exception in closing connection!");
+                }
+            }
+        }
+    }
+
     public ArrayList<NewMapPointer> createShopTable(){
         String sql = "select ShopId, Name, Longitude, Latitude from Shops";
         Connection connection = null;

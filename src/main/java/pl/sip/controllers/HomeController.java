@@ -21,4 +21,5 @@ public class HomeController {
 
     @RequestMapping("/supply")
     public String showSupply() { return "supply"; }
+
 }

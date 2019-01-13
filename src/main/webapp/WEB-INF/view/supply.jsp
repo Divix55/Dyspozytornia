@@ -9,6 +9,16 @@
     <section class="mainBody">
         <div class="row">
             <div class="title"><h1>Dostawy</h1></div>
+            <div class="col-sm-12">
+
+                <div class="mainText">
+                    <p>
+                        Obecne zamowienia <br/>
+                    </p>
+                    ${deliveryTicketFill}
+                    <a href="<j:url value="/supplyDeliveryRequest"/>"><p>Zloz zamowienie</p></a>
+                </div>
+            </div>
         </div>
     </section>
 </main>

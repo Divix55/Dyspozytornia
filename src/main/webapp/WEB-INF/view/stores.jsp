@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://www.springframework.org/tags" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 
 <!DOCTYPE html>
 <html>
@@ -19,6 +20,7 @@
                     </tr>
                     ${mapPointerFill}
                 </table>
+                <a href="<j:url value="/mapPointerRegister"/>"><p>Zarejestruj punkt</p></a>
             </div>
         </div>
     </section>

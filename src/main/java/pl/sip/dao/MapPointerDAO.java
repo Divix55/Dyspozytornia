@@ -7,4 +7,5 @@ import java.util.ArrayList;
 public interface MapPointerDAO {
     ArrayList<NewMapPointer> createShopTable();
     ArrayList<NewMapPointer> createStoreTable();
+    void createMapPointer(NewMapPointer mapPointer, String typeOfPoint);
 }

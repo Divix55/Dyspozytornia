@@ -17,4 +17,8 @@ public class MapPointerServiceImpl implements MapPointerService {
 
     public ArrayList<NewMapPointer> showStoreTable() {return mapPointerDAO.createStoreTable(); }
     public ArrayList<NewMapPointer> showShopTable() {return mapPointerDAO.createShopTable(); }
+
+    public void createMapPointer(NewMapPointer mapPointer, String typeOfPoint) {
+        this.mapPointerDAO.createMapPointer(mapPointer, typeOfPoint);
+    }
 }

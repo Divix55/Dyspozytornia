@@ -19,6 +19,7 @@
                     </tr>
                     ${mapPointerFill}
                 </table>
+                <a href="<j:url value="/mapPointerRegister"/>"><p>Zarejestruj punkt</p></a>
             </div>
         </div>
     </section>

@@ -1,0 +1,11 @@
+package pl.sip.dao;
+
+import pl.sip.dto.SupplyTicket;
+
+import java.util.ArrayList;
+
+public interface SupplyTicketDAO {
+    ArrayList<SupplyTicket> createTicketTable();
+    void createTicket(SupplyTicket ticket);
+    String getShopsName(int shopsId);
+}
