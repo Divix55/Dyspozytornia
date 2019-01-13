@@ -46,7 +46,9 @@
                         <div class="form-group">
                             <div class="col-10 col-sm-8 col-md-6 col-lg-4 col-centered">
                                 <form:radiobutton path="pointType" cssClass="form-control" value="Shop"/>Sklep
-                                <form:radiobutton path="pointType" cssClass="form-control" value="Store"/>Magazyn
+                                <j:if test="${sessionScope.userPrivileges==2}">
+                                    <form:radiobutton path="pointType" cssClass="form-control" value="Store"/>Magazyn
+                                </j:if>
                             </div>
                         </div>
                         <div class="form-group">
