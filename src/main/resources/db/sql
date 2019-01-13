@@ -89,3 +89,29 @@ value ('2', 'Janek', 'Górny');
 
 insert into Drivers (StoreId, FirstName, LastName)
 value ('2', 'Paweł', 'Dolny');
+
+update shops
+set Name = 'Baltycka', Longitude = '54.3831', Latitude = '18.5993'
+where ShopId = 1;
+
+update shops
+set Name = 'Alfa', Longitude = '54.4039',Latitude = '18.5865'
+where ShopId = 2;
+
+update shops
+set Name = 'Przymorze', Longitude = '54.4094',Latitude = '18.5942'
+where ShopId = 3;
+
+insert into Shops (Name, Longitude, Latitude)
+value ('Madison', '54.3560', '18.6495');
+
+insert into Shops (Name, Longitude, Latitude)
+value ('Morena', '54.3523', '18.5919');
+
+update stores
+set Name = 'Magazyn Gumed', Longitude = '54.3670', Latitude = '18.6243'
+where StoreId = 1;
+
+update stores
+set Name = 'Magazyn UG', Longitude = '54.3961', Latitude = '18.5771'
+where StoreId = 2;
