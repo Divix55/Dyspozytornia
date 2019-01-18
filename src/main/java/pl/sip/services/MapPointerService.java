@@ -9,4 +9,5 @@ public interface MapPointerService {
     ArrayList<NewMapPointer> showShopTable();
     void createMapPointer(NewMapPointer mapPointer, String typeOfPoint);
 
+    NewMapPointer getPointerByName(String shopName);
 }

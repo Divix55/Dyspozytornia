@@ -6,6 +6,7 @@ import pl.sip.dao.MapPointerDAO;
 import pl.sip.dto.NewMapPointer;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class MapPointerServiceImpl implements MapPointerService {
@@ -20,5 +21,9 @@ public class MapPointerServiceImpl implements MapPointerService {
 
     public void createMapPointer(NewMapPointer mapPointer, String typeOfPoint) {
         this.mapPointerDAO.createMapPointer(mapPointer, typeOfPoint);
+    }
+
+    public NewMapPointer getPointerByName(String shopName) {
+        return mapPointerDAO.getPointerByName(shopName);
     }
 }

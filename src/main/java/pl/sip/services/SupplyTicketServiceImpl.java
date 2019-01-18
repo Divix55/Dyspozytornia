@@ -26,4 +26,14 @@ public class SupplyTicketServiceImpl implements SupplyTicketService {
     public String getShopsName(int shopId) {
         return supplyTicketDAO.getShopsName(shopId);
     }
+
+    @Override
+    public int[] getDriversByStoreId(int storeId) {
+        return supplyTicketDAO.getDriversByStoreId(storeId);
+    }
+
+    @Override
+    public ArrayList<SupplyTicket> getTicketsByDrivers(int[] drivers) {
+        return supplyTicketDAO.getTicketsByDrivers(drivers);
+    }
 }

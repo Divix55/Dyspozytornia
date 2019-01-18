@@ -8,4 +8,8 @@ public interface SupplyTicketDAO {
     ArrayList<SupplyTicket> createTicketTable();
     void createTicket(SupplyTicket ticket);
     String getShopsName(int shopsId);
+
+    int[] getDriversByStoreId(int storeId);
+
+    ArrayList<SupplyTicket> getTicketsByDrivers(int[] drivers);
 }

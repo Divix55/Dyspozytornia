@@ -38,6 +38,8 @@ public class NewMapPointer {
         this.pointId = pointId;
     }
 
+    public int getPointId() { return this.pointId; }
+
     public String getPointCity() { return pointCity; }
 
     public void setPointCity(String pointCity) { this.pointCity = pointCity; }
@@ -56,5 +58,31 @@ public class NewMapPointer {
 
     public void setPointType(String pointType) {
         this.pointType = pointType;
+    }
+
+    public NewMapPointer(){
+        this.pointId = 0;
+        this.pointName = "";
+        this.pointLongitude = 0.0;
+        this.pointLatitude = 0.0;
+    }
+
+    public NewMapPointer(int id, String name, double longitude, double latitude){
+        this.pointId = id;
+        this.pointName = name;
+        this.pointLongitude = longitude;
+        this.pointLatitude = latitude;
+    }
+
+    public boolean equals(NewMapPointer pointer){
+        if(getPointLongitude() == pointer.getPointLongitude() && getPointLatitude() == pointer.getPointLatitude())
+            return true;
+        return false;
+    }
+
+    public boolean exists(){
+        if(this.pointId != 0)
+            return true;
+        return false;
     }
 }

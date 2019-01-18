@@ -23,7 +23,7 @@ public class SupplyTicketDAOImpl implements SupplyTicketDAO {
     public SupplyTicketDAOImpl(DataSource dataSource) { this.dataSource = dataSource; }
 
     public ArrayList<SupplyTicket> createTicketTable() {
-        String sql = "select SupplyId, ShopId, DeliveryDate, isCompleted from Supply";
+        String sql = "select * from Supply";
         Connection connection = null;
         ArrayList<SupplyTicket> listOfTickets = new ArrayList<SupplyTicket>();
 
@@ -35,6 +35,9 @@ public class SupplyTicketDAOImpl implements SupplyTicketDAO {
                 SupplyTicket newPoint = new SupplyTicket();
                 newPoint.setTicketId(resultSet.getInt("SupplyId"));
                 newPoint.setShopId(resultSet.getInt("ShopId"));
+                newPoint.setStoreId(resultSet.getInt("StoreId"));
+                newPoint.setDriverId(resultSet.getInt("DriverId"));
+                newPoint.setDuration(resultSet.getInt("DurationTime"));
                 newPoint.setDeliveryDate(resultSet.getString("DeliveryDate"));
                 newPoint.setCompleted(resultSet.getBoolean("isCompleted"));
                 listOfTickets.add(newPoint);
@@ -56,13 +59,13 @@ public class SupplyTicketDAOImpl implements SupplyTicketDAO {
     }
 
     public void createTicket(SupplyTicket ticket) {
-        String sql = "Insert into Supply (StoreId, ShopId, DriverId, DeliveryDate, isCompleted)"
-                + "values(?, ?, ?, ?, ?)";
+        String sql = "Insert into Supply (StoreId, ShopId, DriverId, DeliveryDate, DurationTime, isCompleted)"
+                + "values(?, ?, ?, ?, ?, ?)";
         Random rand = new Random();
 
         int shopId = convertNameToId(ticket.getShopName());
-        int storeId = rand.nextInt(checkSize("Stores")) + 1;
-        int driverId = rand.nextInt(checkSize("Drivers")) + 1;
+        int storeId = ticket.getStoreId();
+        int driverId = ticket.getDriverId();
 
         Connection connection = null;
 
@@ -76,7 +79,8 @@ public class SupplyTicketDAOImpl implements SupplyTicketDAO {
             preparedStatement.setInt(2, shopId);
             preparedStatement.setInt(3, driverId);
             preparedStatement.setString(4, ticket.getDeliveryDate());
-            preparedStatement.setBoolean(5, completed);
+            preparedStatement.setInt(5, ticket.getDuration());
+            preparedStatement.setBoolean(6, completed);
             preparedStatement.execute();
             connection.close();
         } catch (SQLException e){
@@ -118,6 +122,78 @@ public class SupplyTicketDAOImpl implements SupplyTicketDAO {
 
         }
         return shopName;
+    }
+
+    @Override
+    public int[] getDriversByStoreId(int storeId) {
+        String sql = "Select * from Drivers where StoreId = ?";
+        int []drivers = new int[15];
+        int driverCounter = 0;
+
+        Connection connection = null;
+        try {
+            connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, storeId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                drivers[driverCounter] = resultSet.getInt("DriverId");
+                driverCounter += 1;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    System.out.print("Exception in closing connection!");
+                }
+            }
+
+        }
+
+        int[] d = new int[driverCounter];
+        for (int i = 0; i<driverCounter; i++){
+            d[i] = drivers[i];
+        }
+
+        return drivers;
+    }
+
+    @Override
+    public ArrayList<SupplyTicket> getTicketsByDrivers(int[] drivers) {
+        ArrayList<SupplyTicket> tickets = new ArrayList<>();
+        for(int driverId: drivers){
+            String sql = "Select * from Supply where DriverId = ? and IsCompleted = FALSE ";
+            Connection connection = null;
+            try {
+                connection = dataSource.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                preparedStatement.setInt(1, driverId);
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    SupplyTicket ticket = new SupplyTicket();
+                    ticket.setStoreId(resultSet.getInt("StoreId"));
+                    ticket.setShopId(resultSet.getInt("ShopId"));
+                    ticket.setDriverId(driverId);
+                    ticket.setDeliveryDate(resultSet.getString("DeliveryDate"));
+                    tickets.add(ticket);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException e) {
+                        System.out.print("Exception in closing connection!");
+                    }
+                }
+            }
+        }
+        return tickets;
     }
 
     private int checkSize(String tableName) {

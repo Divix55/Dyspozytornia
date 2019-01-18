@@ -35,6 +35,14 @@
                             <form:select path="shopYear" cssClass="form-control" name="Wybierz rok">
                                 ${shopYear}
                             </form:select>
+                            Godzina:
+                            <form:select path="shopHour" cssClass="form-control" name="Wybierz godzine">
+                                ${shopHour}
+                            </form:select>
+                            Minuta:
+                            <form:select path="shopMinute" cssClass="form-control" name="Wybierz minute">
+                                ${shopMinute}
+                            </form:select>
                         </div>
                     </div>
                     <div class="form-group">

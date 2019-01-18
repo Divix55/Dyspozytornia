@@ -8,4 +8,8 @@ public interface SupplyTicketService {
     ArrayList<SupplyTicket> showTickets();
     void createTicket(SupplyTicket ticket);
     String getShopsName(int shopId);
+
+    int[] getDriversByStoreId(int storeId);
+
+    ArrayList<SupplyTicket> getTicketsByDrivers(int[] drivers);
 }

@@ -85,6 +85,42 @@ public class MapPointerDAOImpl implements MapPointerDAO {
         }
     }
 
+    public NewMapPointer getPointerByName(String shopName) {
+        String sql = "Select * from Shops where Name=?";
+        Connection connection = null;
+        NewMapPointer newPoint = new NewMapPointer();
+
+        try{
+            connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, shopName);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+
+            if (resultSet.next()) {
+                newPoint.setPointId(resultSet.getInt("ShopId"));
+                newPoint.setPointName(resultSet.getString("Name"));
+                newPoint.setPointLongitude(resultSet.getDouble("Longitude"));
+                newPoint.setPointLatitude(resultSet.getDouble("Latitude"));
+            }
+            connection.close();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if(connection != null){
+                try{
+                    connection.close();
+                } catch(SQLException e){
+                    System.out.print("Exception in closing connection!");
+                }
+            }
+        }
+
+        return newPoint;
+    }
+
+
     public ArrayList<NewMapPointer> createShopTable(){
         String sql = "select ShopId, Name, Longitude, Latitude from Shops";
         Connection connection = null;
