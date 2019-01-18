@@ -33,6 +33,16 @@ public class SupplyTicketServiceImpl implements SupplyTicketService {
         return supplyTicketDAO.getShopsLat(shopId);
     }
 
+
+    public float getStoreLat(int storeId){
+        return supplyTicketDAO.getStoreLat(storeId);
+
+    }
+
+    public float getStoreLon(int storeId){
+        return supplyTicketDAO.getStoreLon(storeId);
+    }
+
     @Override
     public int[] getDriversByStoreId(int storeId) {
         return supplyTicketDAO.getDriversByStoreId(storeId);

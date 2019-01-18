@@ -10,6 +10,8 @@ public interface SupplyTicketService {
     String getShopsName(int shopId);
     float getShopsLon(int shopId);
     float getShopsLat(int shopId);
+    float getStoreLat(int storeId);
+    float getStoreLon(int storeId);
     int[] getDriversByStoreId(int storeId);
     ArrayList<SupplyTicket> getTicketsByDrivers(int[] drivers);
 }

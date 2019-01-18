@@ -50,11 +50,14 @@ function initMap(){
 }
 function calculateAndDisplayRoute(directionsService, directionsDisplay) {
     var nr = document.getElementById("nr_dostawy").value;
-    var lat = document.getElementById("tabela_dostawy").rows[nr].cells[2].innerHTML;
-    var lng = document.getElementById("tabela_dostawy").rows[nr].cells[3].innerHTML;
-    var sklep = new google.maps.LatLng(lat, lng);
+    var shoplat = document.getElementById("tabela_dostawy").rows[nr].cells[2].innerHTML;
+    var shoplng = document.getElementById("tabela_dostawy").rows[nr].cells[3].innerHTML;
+    var sklep = new google.maps.LatLng(shoplat, shoplng);
+    var storelat = document.getElementById("tabela_dostawy").rows[nr].cells[4].innerHTML;
+    var storelng = document.getElementById("tabela_dostawy").rows[nr].cells[5].innerHTML;
+    var magazyn = new google.maps.LatLng(storelat, storelng);
     directionsService.route({
-        origin: {lat: 54.3961, lng: 18.5771},
+        origin: magazyn,
         destination: sklep,
         travelMode: 'DRIVING'
     }, function(response, status) {
