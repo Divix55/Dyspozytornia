@@ -39,15 +39,18 @@ public class SupplyController {
         String tableFill = "Obecnie nie mamy zadnych zamowien";
 
         if( !supplyTickets.isEmpty() ) {
-            tableFill = "<table id='tabela_dostawy'><tr><th>Numer zamowienia</th><th>Nazwa sklepu</th><th style='display: none'>Lon</th><th style='display: none'>Lat</th><th>Oczekiwana data dostawy</th></tr>\n";
+            tableFill = "<table id='tabela_dostawy'><tr><th>Numer zamowienia</th><th>Nazwa sklepu</th><th style='display: none'>Lon</th><th style='display: none'>Lat</th><th>Store Id</th><th>Driver Id</th><th>Czas trwania</th><th>Oczekiwana data dostawy</th></tr>\n";
             for (SupplyTicket ticket : supplyTickets) {
                 if (!ticket.isCompleted()) {
                     String shopName = getShopName(ticket.getShopId());
                     float shopLon = getShopLon(ticket.getShopId());
                     float shopLat = getShopLat(ticket.getShopId());
+                    float storeLon = ticketService.getStoreLon(ticket.getStoreId());
+                    float storeLat = ticketService.getStoreLat(ticket.getStoreId());
                     String htmlTag = "<tr><td>" + ticket.getTicketId() + "</td><td>" + shopName +
                             "</td><td style='display: none'>" + shopLon + "</td><td style='display: none'>" + shopLat +
-                            "</td><td>" + ticket.getDeliveryDate() + "</td></tr>\n";
+                            "</td><td style='display: none'>" + storeLon + "</td><td style='display: none'>" + storeLat +
+                            "</td><td>" + ticket.getStoreId() + "</td><td>"+ ticket.getDriverId() +"</td><td>"+ ticket.getDuration() +"</td><td>" + ticket.getDeliveryDate() + "</td></tr>\n";
                     tableFill += htmlTag;
                 }
             }
@@ -104,7 +107,7 @@ public class SupplyController {
                                                            String date,
                                                            String hour,
                                                            NewMapPointer whereToDeliver){
-        ArrayList<Werehouse>calculatedWerehouses = new ArrayList<>();
+        ArrayList<Werehouse>calculatedWerehouses = new ArrayList<Werehouse>();
         for(NewMapPointer store: werehouses){
             //function picks first suitable
             double distance = calculateDistanceInStraightLine(whereToDeliver, store);

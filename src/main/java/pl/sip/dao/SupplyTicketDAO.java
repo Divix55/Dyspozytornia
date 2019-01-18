@@ -10,6 +10,8 @@ public interface SupplyTicketDAO {
     String getShopsName(int shopsId);
     float getShopsLat(int shopsId);
     float getShopsLon(int shopsId);
+    float getStoreLat(int storeId);
+    float getStoreLon(int storeId);
     int[] getDriversByStoreId(int storeId);
     ArrayList<SupplyTicket> getTicketsByDrivers(int[] drivers);
 }

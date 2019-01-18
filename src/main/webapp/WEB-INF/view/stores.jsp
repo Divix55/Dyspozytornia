@@ -5,7 +5,7 @@
 <html>
 <%@include file="fragments/head.jsp"%>
 <%@include file="fragments/header.jsp"%>
-<body>
+<body onLoad="load()">
 <main>
     <section class="mainBody">
         <div class="row">
@@ -22,6 +22,7 @@
                 </table>
                 <j:if test="${sessionScope.userPrivileges==2}">
                 <a href="<j:url value="/mapPointerRegister"/>"><p>Zarejestruj punkt</p></a>
+                <div id="map" style="width: 500px; height: 500px;">
                 </j:if>
             </div>
         </div>
