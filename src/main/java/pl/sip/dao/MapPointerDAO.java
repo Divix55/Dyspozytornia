@@ -8,4 +8,6 @@ public interface MapPointerDAO {
     ArrayList<NewMapPointer> createShopTable();
     ArrayList<NewMapPointer> createStoreTable();
     void createMapPointer(NewMapPointer mapPointer, String typeOfPoint);
+
+    NewMapPointer getPointerByName(String shopName);
 }

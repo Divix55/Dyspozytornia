@@ -17,6 +17,7 @@
                     </p>
                     ${deliveryTicketFill}
                     <a href="<j:url value="/supplyDeliveryRequest"/>"><p>Zloz zamowienie</p></a>
+
                 </div>
             </div>
         </div>

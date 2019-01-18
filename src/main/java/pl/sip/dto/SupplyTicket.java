@@ -11,6 +11,10 @@ public class SupplyTicket {
     private String shopDay;
     private String shopMonth;
     private String shopYear;
+    private String shopHour;
+    private String shopMinute;
+    private double distance;
+    private int duration;
 
     public int getTicketId() {
         return ticketId;
@@ -90,5 +94,37 @@ public class SupplyTicket {
 
     public String getShopYear() {
         return shopYear;
+    }
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(double distance) {
+        this.distance = distance;
+    }
+
+    public String getShopHour() {
+        return shopHour;
+    }
+
+    public void setShopHour(String shopHour) {
+        this.shopHour = shopHour;
+    }
+
+    public String getShopMinute() {
+        return shopMinute;
+    }
+
+    public void setShopMinute(String shopMinute) {
+        this.shopMinute = shopMinute;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 }
