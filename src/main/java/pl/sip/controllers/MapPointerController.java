@@ -43,8 +43,8 @@ public class MapPointerController {
     private void tableFillerFunction(Model model, ArrayList<NewMapPointer> mapPointer) {
         String tableFill = "";
         for(NewMapPointer point: mapPointer) {
-            String htmlTag = "<tr><td>" + point.getPointName() + "</td><td>" + point.getPointLatitude() +
-                    "</td><td>" + point.getPointLongitude() + "</td></tr>";
+            String htmlTag = "<tr class=\"wiersz\"><td class=\"name\">" + point.getPointName() + "</td><td class=\"lat\">" + point.getPointLatitude() +
+                    "</td><td class=\"lon\">" + point.getPointLongitude() + "</td></tr>";
             tableFill += htmlTag;
         }
         model.addAttribute("mapPointerFill", tableFill);

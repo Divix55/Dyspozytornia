@@ -4,7 +4,7 @@
 <html>
 <%@include file="fragments/head.jsp"%>
 <%@include file="fragments/header.jsp"%>
-<body>
+<body onLoad="load()">
 <main>
     <section class="mainBody">
         <div class="row">
@@ -20,6 +20,8 @@
                     ${mapPointerFill}
                 </table>
                 <a href="<j:url value="/mapPointerRegister"/>"><p>Zarejestruj punkt</p></a>
+                <div id="map" style="width: 500px; height: 500px;">
+                </div>
             </div>
         </div>
     </section>
