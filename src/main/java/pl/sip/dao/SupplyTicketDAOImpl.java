@@ -124,6 +124,62 @@ public class SupplyTicketDAOImpl implements SupplyTicketDAO {
         return shopName;
     }
 
+    public float getShopsLon(int shopsId) {
+        String sql = "Select * from Shops where ShopId = ?";
+        float shopLon = 0;
+
+        Connection connection = null;
+        try {
+            connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            preparedStatement.setInt(1, shopsId);
+            if (resultSet.next()) {
+                shopLon = resultSet.getFloat("Longitude");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    System.out.print("Exception in closing connection!");
+                }
+            }
+        }
+
+        return shopLon;
+    }
+
+        String sql = "Select * from Shops where ShopId = ?";
+    public float getShopsLat(int shopsId) {
+        float shopLat = 0;
+
+        Connection connection = null;
+        try {
+            connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, shopsId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                shopLat = resultSet.getFloat("Latitude");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    System.out.print("Exception in closing connection!");
+                }
+            }
+
+        }
+        return shopLat;
+    }
+
     @Override
     public int[] getDriversByStoreId(int storeId) {
         String sql = "Select * from Drivers where StoreId = ?";

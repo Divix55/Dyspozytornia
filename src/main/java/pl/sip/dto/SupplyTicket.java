@@ -8,6 +8,8 @@ public class SupplyTicket {
     private String deliveryDate;
     private boolean isCompleted;
     private String shopName;
+    private float shopLon;
+    private float shopLat;
     private String shopDay;
     private String shopMonth;
     private String shopYear;
@@ -66,6 +68,12 @@ public class SupplyTicket {
 
     public String getShopName() {
         return shopName;
+    }
+
+    public float getShopLon() { return shopLon; }
+
+    public float getShopLat() {
+        return shopLat;
     }
 
     public void setShopName(String shopName) {

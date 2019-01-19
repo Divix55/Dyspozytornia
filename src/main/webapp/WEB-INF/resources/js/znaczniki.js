@@ -33,3 +33,35 @@ function load() {
         });
     });
 }
+
+function initMap(){
+    var directionsService = new google.maps.DirectionsService;
+    var directionsDisplay = new google.maps.DirectionsRenderer;
+    var map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 54.371765, lng: 18.611966},
+        zoom: 13,
+        mapTypeId: 'roadmap'
+    });
+    directionsDisplay.setMap(map);
+    var onChangeHandler = function() {
+        calculateAndDisplayRoute(directionsService, directionsDisplay);
+    };
+    document.getElementById("myBtn").addEventListener("click", onChangeHandler);
+}
+function calculateAndDisplayRoute(directionsService, directionsDisplay) {
+    var nr = document.getElementById("nr_dostawy").value;
+    var lat = document.getElementById("tabela_dostawy").rows[nr].cells[2].innerHTML;
+    var lng = document.getElementById("tabela_dostawy").rows[nr].cells[3].innerHTML;
+    var sklep = new google.maps.LatLng(lat, lng);
+    directionsService.route({
+        origin: {lat: 54.3961, lng: 18.5771},
+        destination: sklep,
+        travelMode: 'DRIVING'
+    }, function(response, status) {
+        if (status === 'OK') {
+            directionsDisplay.setDirections(response);
+        } else {
+            window.alert('Directions request failed due to ' + status);
+        }
+    });
+}
