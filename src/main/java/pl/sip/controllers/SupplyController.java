@@ -39,12 +39,14 @@ public class SupplyController {
         String tableFill = "Obecnie nie mamy zadnych zamowien";
 
         if( !supplyTickets.isEmpty() ) {
-            tableFill = "<table><tr><th>Numer zamowienia</th><th>Id magazynu</th><th>Nazwa sklepu</th><th>Id kierowcy</th><th>Duration</th><th>Oczekiwana data dostawy</th></tr>\n";
+            tableFill = "<table id='tabela_dostawy'><tr><th>Numer zamowienia</th><th>Nazwa sklepu</th><th style='display: none'>Lon</th><th style='display: none'>Lat</th><th>Oczekiwana data dostawy</th></tr>\n";
             for (SupplyTicket ticket : supplyTickets) {
                 if (!ticket.isCompleted()) {
                     String shopName = getShopName(ticket.getShopId());
-                    String htmlTag = "<tr><td>" + ticket.getTicketId() + "</td><td>" + ticket.getStoreId() + "</td><td>" + shopName +
-                            "</td><td>" + ticket.getDriverId() +"</td><td>" + ticket.getDuration() +
+                    float shopLon = getShopLon(ticket.getShopId());
+                    float shopLat = getShopLat(ticket.getShopId());
+                    String htmlTag = "<tr><td>" + ticket.getTicketId() + "</td><td>" + shopName +
+                            "</td><td style='display: none'>" + shopLon + "</td><td style='display: none'>" + shopLat +
                             "</td><td>" + ticket.getDeliveryDate() + "</td></tr>\n";
                     tableFill += htmlTag;
                 }
@@ -306,6 +308,14 @@ public class SupplyController {
 
     private String getShopName(int shopId){
         return ticketService.getShopsName(shopId);
+    }
+
+    private float getShopLon(int shopId){
+        return ticketService.getShopsLon(shopId);
+    }
+
+    private float getShopLat(int shopId){
+        return ticketService.getShopsLat(shopId);
     }
 }
 

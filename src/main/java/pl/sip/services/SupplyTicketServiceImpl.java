@@ -23,8 +23,14 @@ public class SupplyTicketServiceImpl implements SupplyTicketService {
         this.supplyTicketDAO.createTicket(ticket);
     }
 
-    public String getShopsName(int shopId) {
-        return supplyTicketDAO.getShopsName(shopId);
+    public String getShopsName(int shopId) { return supplyTicketDAO.getShopsName(shopId); }
+
+    public float getShopsLon(int shopId) {
+        return supplyTicketDAO.getShopsLon(shopId);
+    }
+
+    public float getShopsLat(int shopId) {
+        return supplyTicketDAO.getShopsLat(shopId);
     }
 
     @Override
