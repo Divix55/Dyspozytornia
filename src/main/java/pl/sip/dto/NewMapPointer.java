@@ -75,14 +75,10 @@ public class NewMapPointer {
     }
 
     public boolean equals(NewMapPointer pointer){
-        if(getPointLongitude() == pointer.getPointLongitude() && getPointLatitude() == pointer.getPointLatitude())
-            return true;
-        return false;
+        return getPointLongitude() == pointer.getPointLongitude() && getPointLatitude() == pointer.getPointLatitude();
     }
 
     public boolean exists(){
-        if(this.pointId != 0)
-            return true;
-        return false;
+        return this.pointId != 0;
     }
 }

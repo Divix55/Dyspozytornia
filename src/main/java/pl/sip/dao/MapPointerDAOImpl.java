@@ -24,7 +24,7 @@ public class MapPointerDAOImpl implements MapPointerDAO {
     public ArrayList<NewMapPointer> createStoreTable(){
         String sql = "select StoreId, Name, Longitude, Latitude from Stores";
         Connection connection = null;
-        ArrayList<NewMapPointer> listOfPointers = new ArrayList<NewMapPointer>();
+        ArrayList<NewMapPointer> listOfPointers = new ArrayList<>();
 
         try{
             connection = dataSource.getConnection();
@@ -57,9 +57,9 @@ public class MapPointerDAOImpl implements MapPointerDAO {
 
     public void createMapPointer(NewMapPointer mapPointer, String typeOfPoint) {
         String sql = "";
-        if (typeOfPoint == "Stores") {
+        if (typeOfPoint.equals("Stores")) {
             sql = "Insert into Stores (Name, Longitude, Latitude)" + "values(?, ?, ?)";
-        } else if (typeOfPoint == "Shops"){
+        } else if (typeOfPoint.equals("Shops")){
             sql = "Insert into Shops (Name, Longitude, Latitude)" + "values(?, ?, ?)";
         }
         Connection connection = null;
@@ -124,7 +124,7 @@ public class MapPointerDAOImpl implements MapPointerDAO {
     public ArrayList<NewMapPointer> createShopTable(){
         String sql = "select ShopId, Name, Longitude, Latitude from Shops";
         Connection connection = null;
-        ArrayList<NewMapPointer> listOfPointers = new ArrayList<NewMapPointer>();
+        ArrayList<NewMapPointer> listOfPointers = new ArrayList<>();
 
         try{
             connection = dataSource.getConnection();

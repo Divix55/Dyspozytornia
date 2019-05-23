@@ -10,22 +10,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import pl.sip.dto.NewMapPointer;
 import pl.sip.dto.SupplyTicket;
-import pl.sip.dto.Werehouse;
+import pl.sip.dto.Warehouse;
 import pl.sip.services.MapPointerService;
 import pl.sip.services.SupplyTicketService;
+import pl.sip.utils.SipFunctions;
+import pl.sip.utils.SortByDistance;
 
 import javax.validation.Valid;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Controller
 public class SupplyController {
 
-    private static final double SPEED_FACTOR = 1.2;
     private final SupplyTicketService ticketService;
     private final MapPointerService pointerService;
-    protected final Logger log = Logger.getLogger(getClass().getName());
 
     @Autowired
     public SupplyController(SupplyTicketService ticketService, MapPointerService pointerService) {
@@ -36,28 +34,28 @@ public class SupplyController {
     @GetMapping("/supply")
     public String showSupply(Model model){
         ArrayList<SupplyTicket> supplyTickets = ticketService.showTickets();
-        String tableFill = "Obecnie nie mamy zadnych zamowien";
+        StringBuilder tableFill = new StringBuilder("Obecnie nie mamy zadnych zamowien");
 
         if( !supplyTickets.isEmpty() ) {
-            tableFill = "<table id='tabela_dostawy'><tr><th>Numer zamowienia</th><th>Nazwa sklepu</th><th style='display: none'>Lon</th><th style='display: none'>Lat</th><th>Store Id</th><th>Driver Id</th><th>Czas trwania</th><th>Oczekiwana data dostawy</th></tr>\n";
+            tableFill = new StringBuilder("<table id='tabela_dostawy'><tr><th>Numer zamowienia</th><th>Nazwa sklepu</th><th style='display: none'>Lon</th><th style='display: none'>Lat</th><th>Store Id</th><th>Driver Id</th><th>Czas trwania</th><th>Oczekiwana data dostawy</th></tr>\n");
             for (SupplyTicket ticket : supplyTickets) {
                 if (!ticket.isCompleted()) {
-                    String shopName = getShopName(ticket.getShopId());
-                    float shopLon = getShopLon(ticket.getShopId());
-                    float shopLat = getShopLat(ticket.getShopId());
+                    String shopName = ticketService.getShopsName(ticket.getShopId());
+                    float shopLon = ticketService.getShopsLon(ticket.getShopId());
+                    float shopLat = ticketService.getShopsLat(ticket.getShopId());
                     float storeLon = ticketService.getStoreLon(ticket.getStoreId());
                     float storeLat = ticketService.getStoreLat(ticket.getStoreId());
                     String htmlTag = "<tr><td>" + ticket.getTicketId() + "</td><td>" + shopName +
                             "</td><td style='display: none'>" + shopLon + "</td><td style='display: none'>" + shopLat +
                             "</td><td style='display: none'>" + storeLon + "</td><td style='display: none'>" + storeLat +
                             "</td><td>" + ticket.getStoreId() + "</td><td>"+ ticket.getDriverId() +"</td><td>"+ ticket.getDuration() +"</td><td>" + ticket.getDeliveryDate() + "</td></tr>\n";
-                    tableFill += htmlTag;
+                    tableFill.append(htmlTag);
                 }
             }
-            tableFill += "</table>";
+            tableFill.append("</table>");
         }
 
-        model.addAttribute("deliveryTicketFill", tableFill);
+        model.addAttribute("deliveryTicketFill", tableFill.toString());
 
         return "supply";
     }
@@ -65,65 +63,42 @@ public class SupplyController {
     @RequestMapping(value = "/supplyDeliveryRequest", method = RequestMethod.GET)
     public String mapPointerRegister(Model model){
         ArrayList<NewMapPointer> shopList = pointerService.showShopTable();
-        String shopOptions = "";
-        String shopDay = "";
-        String shopMonth = "";
-        String shopYear = "";
-        String shopHour = "";
-        String shopMinute = "";
+        StringBuilder shopOptions = new StringBuilder();
+        StringBuilder shopDay = new StringBuilder();
+        StringBuilder shopMonth = new StringBuilder();
+        StringBuilder shopYear = new StringBuilder();
+        StringBuilder shopHour = new StringBuilder();
+        StringBuilder shopMinute = new StringBuilder();
 
         for(NewMapPointer shop: shopList){
             String htmlTag = "<option>" + shop.getPointName() + "</option>";
-            shopOptions += htmlTag;
+            shopOptions.append(htmlTag);
         }
 
         for (int i=1; i<=60; i++){
             if (i<= 12){
-                shopMonth += "<option>" + i + "</option>";
+                shopMonth.append("<option>").append(i).append("</option>");
             }
             if(i<=31){
-                shopDay += "<option>" + i + "</option>";
+                shopDay.append("<option>").append(i).append("</option>");
             }
             if(i >= 8 && i< 16){
-                shopHour += "<option>" + i + "</option>";
+                shopHour.append("<option>").append(i).append("</option>");
             }
-            shopMinute += "<option>" + (i - 1) + "</option>";
-            shopYear += "<option>" + (2018 + i) + "</option>";
+            shopMinute.append("<option>").append(i - 1).append("</option>");
+            shopYear.append("<option>").append(2018 + i).append("</option>");
         }
 
 
         model.addAttribute("supplyDeliveryRequestForm", new SupplyTicket());
-        model.addAttribute("shopIdOptions", shopOptions);
-        model.addAttribute("shopDay", shopDay);
-        model.addAttribute("shopMonth", shopMonth);
-        model.addAttribute("shopYear", shopYear);
-        model.addAttribute("shopHour", shopHour);
-        model.addAttribute("shopMinute", shopMinute);
+        model.addAttribute("shopIdOptions", shopOptions.toString());
+        model.addAttribute("shopDay", shopDay.toString());
+        model.addAttribute("shopMonth", shopMonth.toString());
+        model.addAttribute("shopYear", shopYear.toString());
+        model.addAttribute("shopHour", shopHour.toString());
+        model.addAttribute("shopMinute", shopMinute.toString());
 
         return "supplyDeliveryRequest";
-    }
-
-    private ArrayList<Werehouse> calculateWerehousesByTime(ArrayList<NewMapPointer> werehouses,
-                                                           String date,
-                                                           String hour,
-                                                           NewMapPointer whereToDeliver){
-        ArrayList<Werehouse>calculatedWerehouses = new ArrayList<Werehouse>();
-        for(NewMapPointer store: werehouses){
-            //function picks first suitable
-            double distance = calculateDistanceInStraightLine(whereToDeliver, store);
-            int availableDrivers = checkAvailableDrivers(store.getPointId(), distance, date, hour);
-            if (availableDrivers != 0) {
-
-                Werehouse calculatedStore = new Werehouse();
-                calculatedStore.setAvailableDrivers(availableDrivers);
-                calculatedStore.setStoreId(store.getPointId());
-                calculatedStore.setDistance(distance);
-                calculatedStore.setDriverId(availableDrivers);
-
-                calculatedWerehouses.add(calculatedStore);
-            }
-        }
-        return calculatedWerehouses;
     }
 
     @RequestMapping(value = "/supplyDeliveryRequest", method = RequestMethod.POST)
@@ -138,28 +113,28 @@ public class SupplyController {
             return "home";
         }
         else{
-            ArrayList<NewMapPointer> werehouses = addWerehouses();
+            ArrayList<NewMapPointer> warehouses = pointerService.showStoreTable();
             NewMapPointer whereToDeliver = pointerService.getPointerByName(form.getShopName());
 
             boolean isDriverAlreadyPicked = false;
 
             while(!isDriverAlreadyPicked) {
-                List<Werehouse>calculatedWerehouses = calculateWerehousesByTime(werehouses, date, hour, whereToDeliver);
-                if(!calculatedWerehouses.isEmpty()) {
-                    Collections.sort(calculatedWerehouses, new SortByDistance());
-                    for (Werehouse store : calculatedWerehouses) {
+                List<Warehouse>calculatedWarehouses = calculateWarehousesByTime(warehouses, date, hour, whereToDeliver);
+                if(!calculatedWarehouses.isEmpty()) {
+                    Collections.sort(calculatedWarehouses, new SortByDistance());
+                    for (Warehouse store : calculatedWarehouses) {
                         if (store.getAvailableDrivers() > 0) {
                             form.setDriverId(store.getDriverId());
                             form.setDistance(store.getDistance());
                             form.setStoreId(store.getStoreId());
-                            form.setDuration(calculateDuration(store.getDistance()));
+                            form.setDuration(SipFunctions.calculateDuration(store.getDistance()));
                             form.setDeliveryDate(date + " " + hour);
                             isDriverAlreadyPicked = true;
                             break;
                         }
                     }
                 }
-                String newDate = tryNextHour(date, hour);
+                String newDate = SipFunctions.tryNextHour(date, hour);
                 date = newDate.split(" ")[0];
                 hour = newDate.split(" ")[1];
             }
@@ -169,18 +144,36 @@ public class SupplyController {
         }
     }
 
-    private int calculateDuration(double distance) {
-        int duration = (int) Math.round(distance*SPEED_FACTOR);
-        return  duration;
+    private ArrayList<Warehouse> calculateWarehousesByTime(ArrayList<NewMapPointer> warehouses,
+                                                           String date,
+                                                           String hour,
+                                                           NewMapPointer whereToDeliver){
+        ArrayList<Warehouse>calculatedWarehouses = new ArrayList<>();
+        for(NewMapPointer store: warehouses){
+            //function picks first suitable
+            double distance = SipFunctions.calculateDistanceInStraightLine(whereToDeliver, store);
+            int availableDrivers = checkAvailableDrivers(store.getPointId(), distance, date, hour);
+            if (availableDrivers != 0) {
+
+                Warehouse calculatedStore = new Warehouse();
+                calculatedStore.setAvailableDrivers(availableDrivers);
+                calculatedStore.setStoreId(store.getPointId());
+                calculatedStore.setDistance(distance);
+                calculatedStore.setDriverId(availableDrivers);
+
+                calculatedWarehouses.add(calculatedStore);
+            }
+        }
+        return calculatedWarehouses;
     }
 
     private int checkAvailableDrivers(int storeId, double distance, String deliveryDate, String deliveryHour){
         int[] drivers = ticketService.getDriversByStoreId(storeId);
-        int deliveryDuration = calculateDuration(distance);
+        int deliveryDuration = SipFunctions.calculateDuration(distance);
         ArrayList<SupplyTicket> driversTickets = ticketService.getTicketsByDrivers(drivers);
 
         for(int driver: drivers){
-            boolean ifAvailableForDelivery = checkAvailibility(driver, driversTickets, deliveryDate, deliveryHour, deliveryDuration);
+            boolean ifAvailableForDelivery = checkAvailability(driver, driversTickets, deliveryDate, deliveryHour, deliveryDuration);
             if(ifAvailableForDelivery){
                 return driver;
             }
@@ -189,11 +182,11 @@ public class SupplyController {
         return 0;
     }
 
-    private boolean checkAvailibility(int driverId,
-                                      ArrayList<SupplyTicket> driversTickets,
-                                      String deliveryDate,
-                                      String deliveryHour,
-                                      int deliveryDuration) {
+    private boolean checkAvailability(int driverId,
+                                             ArrayList<SupplyTicket> driversTickets,
+                                             String deliveryDate,
+                                             String deliveryHour,
+                                             int deliveryDuration) {
         for(SupplyTicket ticket: driversTickets){
             if (ticket.getDriverId() == driverId){
                 String ticketFullDate = ticket.getDeliveryDate().split(" ")[0];
@@ -215,116 +208,6 @@ public class SupplyController {
                 }
             }
         }
-
-
         return true;
-    }
-
-    private String tryNextHour(String date, String h) {
-        String[] hour = h.split(":");
-        int hourInt = Integer.parseInt(hour[0]);
-        int minInt = Integer.parseInt(hour[1]);
-        if (hourInt >= 8 && hourInt < 16){
-            if (minInt >= 0 && minInt < 60){
-                if(hourInt == 15 && minInt == 59){
-                    h = addDigitToTime(hourInt, minInt, 'H');
-                }
-                h = addDigitToTime(hourInt, minInt, 'M');
-            }
-            else{
-                h = addDigitToTime(hourInt, minInt, 'H');
-            }
-        }
-        else{
-            hourInt = 8;
-            minInt = 0;
-            date = setDateToNextDay(date);
-            h = hourInt + ":" + minInt;
-        }
-
-        return date + " " + h;
-    }
-
-    private String addDigitToTime(int timeHour, int timeMin, char type){
-        //minutes
-        if (type == 'M'){
-            if (timeMin == 59){
-                timeHour += 1;
-                timeMin = 0;
-            }
-            else{
-                timeMin += 1;
-            }
-        }
-        //hours
-        else if(type == 'H'){
-            timeHour += 1;
-            timeMin = 0;
-        }
-
-        return timeHour + ":" + timeMin;
-    }
-
-    private static String setDateToNextDay(String d){
-        String[] date = d.split("-");
-        int yearInt = Integer.parseInt(date[0]);
-        int monthInt = Integer.parseInt(date[1]);
-        int dayInt = Integer.parseInt(date[2]);
-
-        if (dayInt < 31){
-            dayInt += 1;
-        }
-        else if(monthInt < 12){
-            dayInt = 1;
-            monthInt += 1;
-        }
-        else{
-            dayInt = 1;
-            monthInt = 1;
-            yearInt += 1;
-        }
-        return yearInt + "-" + monthInt + "-" + dayInt;
-    }
-
-    private ArrayList<NewMapPointer> addWerehouses() {
-        return pointerService.showStoreTable();
-    }
-
-    private static double calculateDistanceInStraightLine( NewMapPointer point1, NewMapPointer point2) {
-        if (point1.equals(point2)) {
-            return 0;
-        }
-        else {
-            double lon1 = point1.getPointLongitude();
-            double lon2 = point2.getPointLongitude();
-            double lat1 = point1.getPointLatitude();
-            double lat2 = point2.getPointLatitude();
-            double theta = lon1 - lon2;
-
-            double dist = Math.sin(Math.toRadians(lat1)) * Math.sin(Math.toRadians(lat2)) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.cos(Math.toRadians(theta));
-            dist = Math.acos(dist);
-            dist = Math.toDegrees(dist);
-            dist = dist * 60 * 1.1515;
-            return (dist);
-        }
-    }
-
-    private String getShopName(int shopId){
-        return ticketService.getShopsName(shopId);
-    }
-
-    private float getShopLon(int shopId){
-        return ticketService.getShopsLon(shopId);
-    }
-
-    private float getShopLat(int shopId){
-        return ticketService.getShopsLat(shopId);
-    }
-}
-
-class SortByDistance implements Comparator<Werehouse> {
-
-    public int compare(Werehouse o1, Werehouse o2) {
-        return (int) (o1.getDistance() - o2.getDistance());
     }
 }
