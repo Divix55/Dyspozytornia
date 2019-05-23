@@ -11,13 +11,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.logging.Logger;
 
 @Repository
 public class SupplyTicketDAOImpl implements SupplyTicketDAO {
 
     private final DataSource dataSource;
-    protected final Logger log = Logger.getLogger(getClass().getName());
 
     @Autowired
     public SupplyTicketDAOImpl(DataSource dataSource) { this.dataSource = dataSource; }
@@ -126,44 +124,34 @@ public class SupplyTicketDAOImpl implements SupplyTicketDAO {
 
     public float getShopsLon(int shopsId) {
         String sql = "Select * from Shops where ShopId = ?";
-        float shopLon = 0;
-
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, shopsId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                shopLon = resultSet.getFloat("Longitude");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    System.out.print("Exception in closing connection!");
-                }
-            }
-        }
-
-        return shopLon;
+        return executeLonSelect(shopsId, sql);
     }
 
     public float getShopsLat(int shopsId) {
         String sql = "Select * from Shops where ShopId = ?";
-        float shopLat = 0;
+        return executeLatSelect(shopsId, sql);
+    }
 
+    public float getStoreLon(int storeId){
+        String sql = "Select * from Stores where StoreId = ?";
+        return executeLonSelect(storeId, sql);
+    }
+
+    public float getStoreLat(int storeId){
+        String sql = "Select * from Stores where StoreId = ?";
+        return executeLatSelect(storeId, sql);
+    }
+
+    private float executeLonSelect(int shopsId, String sql) {
         Connection connection = null;
+        float lon=0;
         try {
             connection = dataSource.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, shopsId);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                shopLat = resultSet.getFloat("Latitude");
+                lon = resultSet.getFloat("Longitude");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -175,24 +163,21 @@ public class SupplyTicketDAOImpl implements SupplyTicketDAO {
                     System.out.print("Exception in closing connection!");
                 }
             }
-
         }
-        return shopLat;
+
+        return lon;
     }
 
-    public float getStoreLat(int storeId){
-
-        String sql = "Select * from Stores where StoreId = ?";
-        float shopLat = 0;
-
+    private float executeLatSelect(int storeId, String sql) {
         Connection connection = null;
+        float lat=0;
         try {
             connection = dataSource.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, storeId);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                shopLat = resultSet.getFloat("Latitude");
+                lat = resultSet.getFloat("Latitude");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -206,34 +191,7 @@ public class SupplyTicketDAOImpl implements SupplyTicketDAO {
             }
 
         }
-        return shopLat;
-    }
-    public float getStoreLon(int storeId){
-        String sql = "Select * from Stores where StoreId = ?";
-        float shopLon = 0;
-
-        Connection connection = null;
-        try {
-            connection = dataSource.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, storeId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                shopLon = resultSet.getFloat("Longitude");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    System.out.print("Exception in closing connection!");
-                }
-            }
-        }
-
-        return shopLon;
+        return lat;
     }
 
 
@@ -277,7 +235,7 @@ public class SupplyTicketDAOImpl implements SupplyTicketDAO {
 
     @Override
     public ArrayList<SupplyTicket> getTicketsByDrivers(int[] drivers) {
-        ArrayList<SupplyTicket> tickets = new ArrayList<SupplyTicket>();
+        ArrayList<SupplyTicket> tickets = new ArrayList<>();
         for(int driverId: drivers){
             String sql = "Select * from Supply where DriverId = ? and IsCompleted = FALSE ";
             Connection connection = null;

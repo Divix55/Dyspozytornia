@@ -1,6 +1,6 @@
 package pl.sip.dto;
 
-public class Werehouse {
+public class Warehouse {
     private double distance;
     private int storeId;
     private int availableDrivers;
@@ -22,7 +22,7 @@ public class Werehouse {
         this.storeId = storeId;
     }
 
-    public Werehouse(){
+    public Warehouse(){
         this.distance = 0.0;
         this.storeId = 0;
     }
