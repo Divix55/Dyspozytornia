@@ -6,7 +6,8 @@ import java.util.ArrayList;
 
 public interface SupplyTicketService {
     ArrayList<SupplyTicket> showTickets();
-    void createTicket(SupplyTicket ticket);
+    void createTicketNaive(SupplyTicket ticket);
+    void createTicketEntry(SupplyTicket ticket);
     String getShopsName(int shopId);
     float getShopsLon(int shopId);
     float getShopsLat(int shopId);

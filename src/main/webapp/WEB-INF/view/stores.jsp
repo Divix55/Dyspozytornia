@@ -23,7 +23,8 @@
                 <j:if test="${sessionScope.userPrivileges==2}">
                 <a href="<j:url value="/mapPointerRegister"/>"><p>Zarejestruj punkt</p></a>
                 <div id="map" style="width: 500px; height: 500px;">
-                </j:if>
+                    </j:if>
+                </div>
             </div>
         </div>
     </section>

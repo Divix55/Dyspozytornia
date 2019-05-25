@@ -19,8 +19,12 @@ public class SupplyTicketServiceImpl implements SupplyTicketService {
         return supplyTicketDAO.createTicketTable();
     }
 
-    public void createTicket(SupplyTicket ticket) {
-        this.supplyTicketDAO.createTicket(ticket);
+    public void createTicketNaive(SupplyTicket ticket) {
+        this.supplyTicketDAO.createTicketNaive(ticket);
+    }
+
+    public void createTicketEntry(SupplyTicket ticket) {
+        this.supplyTicketDAO.createTicketEntry(ticket);
     }
 
     public String getShopsName(int shopId) { return supplyTicketDAO.getShopsName(shopId); }

@@ -1,4 +1,5 @@
 package pl.sip.dto;
+import java.util.logging.Logger;
 
 public class SupplyTicket {
     private int ticketId;
@@ -8,6 +9,7 @@ public class SupplyTicket {
     private String deliveryDate;
     private boolean isCompleted;
     private String shopName;
+    private String ticketStatus;
     private float shopLon;
     private float shopLat;
     private String shopDay;
@@ -17,6 +19,10 @@ public class SupplyTicket {
     private String shopMinute;
     private double distance;
     private int duration;
+    private Logger log = Logger.getLogger("SupplyTicket");
+
+    public SupplyTicket() {
+    }
 
     public int getTicketId() {
         return ticketId;
@@ -134,5 +140,25 @@ public class SupplyTicket {
 
     public void setDuration(int duration) {
         this.duration = duration;
+    }
+
+    public String getTicketStatus() {
+        return ticketStatus;
+    }
+
+    public void setTicketStatus(String ticketStatus) {
+
+        if (ticketStatus.equals("oczekujace") ||
+                ticketStatus.equals("w realizacji") ||
+                ticketStatus.equals("dostarczone"))
+            this.ticketStatus = ticketStatus;
+        else this.ticketStatus = "nieprawidlowe";
+    }
+
+    @Override
+    public String toString(){
+        return "TicketId: " + ticketId + " |StoreId: " + storeId + " |ShopId: " + shopId + " |ShopName: " + shopName + " |DriverId: " + driverId +
+                " |DeliveryDate: " + deliveryDate + " |Lon: " + shopLon + " |Lat: " + shopLat + " |Dist: " + distance +
+                " |Duration: " + duration;
     }
 }
