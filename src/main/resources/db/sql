@@ -38,11 +38,13 @@ create table if not exists Drivers (
 
 create table if not exists Supply (
   SupplyId int not null auto_increment primary key,
-  StoreId int not null,
+  StoreId int,
   ShopId int not null,
-  DriverId int not null,
+  ShopName varchar(255) not null,
+  DriverId int,
   DeliveryDate varchar(255) not null,
-  DurationTime int not null,
+  DurationTime int,
+  Status varchar(15) not null default 'oczekujace',
   isCompleted Boolean not null,
   foreign key (StoreId) references Stores(StoreId),
   foreign key (ShopId) references Shops(ShopId),
