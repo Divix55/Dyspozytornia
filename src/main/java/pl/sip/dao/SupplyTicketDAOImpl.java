@@ -11,11 +11,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.logging.Logger;
 
 @Repository
 public class SupplyTicketDAOImpl implements SupplyTicketDAO {
 
     private final DataSource dataSource;
+    Logger log = Logger.getLogger("SupplyTicketDAOImpl");
 
     @Autowired
     public SupplyTicketDAOImpl(DataSource dataSource) { this.dataSource = dataSource; }
@@ -37,6 +39,7 @@ public class SupplyTicketDAOImpl implements SupplyTicketDAO {
                 newPoint.setDriverId(resultSet.getInt("DriverId"));
                 newPoint.setDuration(resultSet.getInt("DurationTime"));
                 newPoint.setDeliveryDate(resultSet.getString("DeliveryDate"));
+                newPoint.setTicketStatus(resultSet.getString("Status"));
                 newPoint.setCompleted(resultSet.getBoolean("isCompleted"));
                 listOfTickets.add(newPoint);
             }
@@ -56,29 +59,59 @@ public class SupplyTicketDAOImpl implements SupplyTicketDAO {
         return listOfTickets;
     }
 
-    public void createTicket(SupplyTicket ticket) {
-        String sql = "Insert into Supply (StoreId, ShopId, DriverId, DeliveryDate, DurationTime, isCompleted)"
-                + "values(?, ?, ?, ?, ?, ?)";
-        Random rand = new Random();
+    public void createTicketEntry(SupplyTicket ticket){
+        String sql = "Insert into Supply (ShopId, ShopName, DeliveryDate, Status, isCompleted)"
+                + "values(?, ?, ?, ?, ?)";
 
+        String date = ticket.getShopYear() + "-" + ticket.getShopMonth() + "-" + ticket.getShopDay();
+        String hour = ticket.getShopHour() + ":" + ticket.getShopMinute();
         int shopId = convertNameToId(ticket.getShopName());
-        int storeId = ticket.getStoreId();
-        int driverId = ticket.getDriverId();
 
         Connection connection = null;
-
 
         try {
             connection = dataSource.getConnection();
             boolean completed = false;
 
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, shopId);
+            preparedStatement.setString(2, ticket.getShopName());
+            preparedStatement.setString(3, date + " " + hour);
+            preparedStatement.setString(4, "oczekujace");
+            preparedStatement.setBoolean(5, completed);
+            preparedStatement.execute();
+            connection.close();
+        } catch (SQLException e){
+            throw new RuntimeException(e);
+        } finally {
+            if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException e){
+                    System.out.print("Exception in closing connection!");
+                }
+            }
+        }
+    }
+
+    public void createTicketNaive(SupplyTicket ticket) {
+        String sql = "update Supply set StoreId = ?, DriverId = ?, DeliveryDate = ?, DurationTime = ?, Status = ? where SupplyId = ?";
+
+        int storeId = ticket.getStoreId();
+        int driverId = ticket.getDriverId();
+
+        Connection connection = null;
+
+        try {
+            connection = dataSource.getConnection();
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, storeId);
-            preparedStatement.setInt(2, shopId);
-            preparedStatement.setInt(3, driverId);
-            preparedStatement.setString(4, ticket.getDeliveryDate());
-            preparedStatement.setInt(5, ticket.getDuration());
-            preparedStatement.setBoolean(6, completed);
+            preparedStatement.setInt(2, driverId);
+            preparedStatement.setString(3, ticket.getDeliveryDate());
+            preparedStatement.setInt(4, ticket.getDuration());
+            preparedStatement.setString(5, ticket.getTicketStatus());
+            preparedStatement.setInt(6, ticket.getTicketId());
             preparedStatement.execute();
             connection.close();
         } catch (SQLException e){

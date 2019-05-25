@@ -1,6 +1,7 @@
 package pl.sip.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,12 +19,14 @@ import pl.sip.utils.SortByDistance;
 
 import javax.validation.Valid;
 import java.util.*;
+import java.util.logging.Logger;
 
 @Controller
 public class SupplyController {
 
     private final SupplyTicketService ticketService;
     private final MapPointerService pointerService;
+    private Logger log = Logger.getLogger("SupplyController");
 
     @Autowired
     public SupplyController(SupplyTicketService ticketService, MapPointerService pointerService) {
@@ -37,7 +40,9 @@ public class SupplyController {
         StringBuilder tableFill = new StringBuilder("Obecnie nie mamy zadnych zamowien");
 
         if( !supplyTickets.isEmpty() ) {
-            tableFill = new StringBuilder("<table id='tabela_dostawy'><tr><th>Numer zamowienia</th><th>Nazwa sklepu</th><th style='display: none'>Lon</th><th style='display: none'>Lat</th><th>Store Id</th><th>Driver Id</th><th>Czas trwania</th><th>Oczekiwana data dostawy</th></tr>\n");
+            tableFill = new StringBuilder("<table id='tabela_dostawy'><tr><th>Numer zamowienia</th><th>Nazwa sklepu" +
+                    "</th><th style='display: none'>Lon</th><th style='display: none'>Lat</th><th>Store Id</th><th>" +
+                    "Driver Id</th><th>Czas trwania</th><th>Status</th><th>Oczekiwana data dostawy</th></tr>\n");
             for (SupplyTicket ticket : supplyTickets) {
                 if (!ticket.isCompleted()) {
                     String shopName = ticketService.getShopsName(ticket.getShopId());
@@ -48,7 +53,9 @@ public class SupplyController {
                     String htmlTag = "<tr><td>" + ticket.getTicketId() + "</td><td>" + shopName +
                             "</td><td style='display: none'>" + shopLon + "</td><td style='display: none'>" + shopLat +
                             "</td><td style='display: none'>" + storeLon + "</td><td style='display: none'>" + storeLat +
-                            "</td><td>" + ticket.getStoreId() + "</td><td>"+ ticket.getDriverId() +"</td><td>"+ ticket.getDuration() +"</td><td>" + ticket.getDeliveryDate() + "</td></tr>\n";
+                            "</td><td>" + ticket.getStoreId() + "</td><td>"+ ticket.getDriverId() +"</td><td>"+
+                            ticket.getDuration() + "</td><td>" + ticket.getTicketStatus() + "</td><td>"+
+                            ticket.getDeliveryDate() + "</td></tr>\n";
                     tableFill.append(htmlTag);
                 }
             }
@@ -58,6 +65,59 @@ public class SupplyController {
         model.addAttribute("deliveryTicketFill", tableFill.toString());
 
         return "supply";
+    }
+
+    @RequestMapping(value = "/acceptDelivery", method = RequestMethod.GET)
+    public String acceptDelivery(Model model){
+        ArrayList<SupplyTicket> supplyTickets = ticketService.showTickets();
+
+        for (SupplyTicket ticket: supplyTickets){
+            if(ticket.getTicketStatus().equals("oczekujace")){
+                ticket.setTicketStatus("w realizacji");
+
+                log.info("Przed wyznaczeniem trasy");
+                //TODO: use new distance algorithm instead of this
+                createTicketDataNaiveAlgorithm(ticket);
+                log.info("Po wyznaczeniu trasy");
+            }
+        }
+        // TODO: distance algorithm goes here
+        //change their status
+        //send them back to db
+        return "supply";
+    }
+
+    private void createTicketDataNaiveAlgorithm(SupplyTicket ticket){
+        String date = ticket.getDeliveryDate().split(" ")[0];
+        String hour = ticket.getDeliveryDate().split(" ")[1];
+
+        ArrayList<NewMapPointer> warehouses = pointerService.showStoreTable();
+        NewMapPointer whereToDeliver = pointerService.getPointerByName(ticket.getShopName());
+        boolean isDriverAlreadyPicked = false;
+
+        while(!isDriverAlreadyPicked) {
+            List<Warehouse>calculatedWarehouses = calculateWarehousesByTime(warehouses, date, hour, whereToDeliver);
+            if(!calculatedWarehouses.isEmpty()) {
+                Collections.sort(calculatedWarehouses, new SortByDistance());
+                for (Warehouse store : calculatedWarehouses) {
+                    if (store.getAvailableDrivers() > 0) {
+                        ticket.setDriverId(store.getDriverId());
+                        ticket.setDistance(store.getDistance());
+                        ticket.setStoreId(store.getStoreId());
+                        ticket.setDuration(SipFunctions.calculateDuration(store.getDistance()));
+                        ticket.setDeliveryDate(date + " " + hour);
+                        ticket.setTicketStatus("w realizacji");
+                        isDriverAlreadyPicked = true;
+                        break;
+                    }
+                }
+            }
+            String newDate = SipFunctions.tryNextHour(date, hour);
+            date = newDate.split(" ")[0];
+            hour = newDate.split(" ")[1];
+        }
+
+        ticketService.createTicketNaive(ticket);
     }
 
     @RequestMapping(value = "/supplyDeliveryRequest", method = RequestMethod.GET)
@@ -85,7 +145,11 @@ public class SupplyController {
             if(i >= 8 && i< 16){
                 shopHour.append("<option>").append(i).append("</option>");
             }
-            shopMinute.append("<option>").append(i - 1).append("</option>");
+            if(i<=10) {
+                shopMinute.append("<option>").append("0").append(i - 1).append("</option>");
+            }
+            else
+                shopMinute.append("<option>").append(i - 1).append("</option>");
             shopYear.append("<option>").append(2018 + i).append("</option>");
         }
 
@@ -102,44 +166,16 @@ public class SupplyController {
     }
 
     @RequestMapping(value = "/supplyDeliveryRequest", method = RequestMethod.POST)
-    public String checkMapPointerRegister(@ModelAttribute("supplyDeliveryRequestForm") @Valid SupplyTicket form,
+    public String checkMapPointerRegister(@ModelAttribute("supplyDeliveryRequestForm") @Valid SupplyTicket ticket,
                                           BindingResult result,
                                           Model model){
 
-        String date = form.getShopYear() + "-" + form.getShopMonth() + "-" + form.getShopDay();
-        String hour = form.getShopHour() + ":" + form.getShopMinute();
         if(result.hasErrors()){
             model.addAttribute("error_msg", "Wrong credentials!");
             return "home";
         }
         else{
-            ArrayList<NewMapPointer> warehouses = pointerService.showStoreTable();
-            NewMapPointer whereToDeliver = pointerService.getPointerByName(form.getShopName());
-
-            boolean isDriverAlreadyPicked = false;
-
-            while(!isDriverAlreadyPicked) {
-                List<Warehouse>calculatedWarehouses = calculateWarehousesByTime(warehouses, date, hour, whereToDeliver);
-                if(!calculatedWarehouses.isEmpty()) {
-                    Collections.sort(calculatedWarehouses, new SortByDistance());
-                    for (Warehouse store : calculatedWarehouses) {
-                        if (store.getAvailableDrivers() > 0) {
-                            form.setDriverId(store.getDriverId());
-                            form.setDistance(store.getDistance());
-                            form.setStoreId(store.getStoreId());
-                            form.setDuration(SipFunctions.calculateDuration(store.getDistance()));
-                            form.setDeliveryDate(date + " " + hour);
-                            isDriverAlreadyPicked = true;
-                            break;
-                        }
-                    }
-                }
-                String newDate = SipFunctions.tryNextHour(date, hour);
-                date = newDate.split(" ")[0];
-                hour = newDate.split(" ")[1];
-            }
-
-            ticketService.createTicket(form);
+            ticketService.createTicketEntry(ticket);
             return "redirect:/supply";
         }
     }
@@ -168,10 +204,10 @@ public class SupplyController {
     }
 
     private int checkAvailableDrivers(int storeId, double distance, String deliveryDate, String deliveryHour){
+        // TODO: something's not quite right here
         int[] drivers = ticketService.getDriversByStoreId(storeId);
         int deliveryDuration = SipFunctions.calculateDuration(distance);
         ArrayList<SupplyTicket> driversTickets = ticketService.getTicketsByDrivers(drivers);
-
         for(int driver: drivers){
             boolean ifAvailableForDelivery = checkAvailability(driver, driversTickets, deliveryDate, deliveryHour, deliveryDuration);
             if(ifAvailableForDelivery){

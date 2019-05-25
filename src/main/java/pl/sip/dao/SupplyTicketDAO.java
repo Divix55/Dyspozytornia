@@ -6,7 +6,8 @@ import java.util.ArrayList;
 
 public interface SupplyTicketDAO {
     ArrayList<SupplyTicket> createTicketTable();
-    void createTicket(SupplyTicket ticket);
+    void createTicketNaive(SupplyTicket ticket);
+    void createTicketEntry(SupplyTicket ticket);
     String getShopsName(int shopsId);
     float getShopsLat(int shopsId);
     float getShopsLon(int shopsId);
