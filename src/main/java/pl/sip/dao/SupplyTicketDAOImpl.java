@@ -263,7 +263,7 @@ public class SupplyTicketDAOImpl implements SupplyTicketDAO {
             d[i] = drivers[i];
         }
 
-        return drivers;
+        return d;
     }
 
     @Override
