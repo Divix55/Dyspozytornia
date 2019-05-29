@@ -2,8 +2,11 @@ package pl.sip.utils;
 
 import pl.sip.dto.NewMapPointer;
 
+import java.util.logging.Logger;
+
 public class SipFunctions {
     private static final double SPEED_FACTOR = 1.2;
+    private static Logger log = Logger.getLogger("SipFunctions");
 
     public static int calculateDuration(double distance) {
         return (int) Math.round(distance*SPEED_FACTOR);

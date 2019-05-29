@@ -10,11 +10,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 @Repository
 public class MapPointerDAOImpl implements MapPointerDAO {
 
     private final DataSource dataSource;
+    private Logger log = Logger.getLogger("MapPointerDAO");
 
     @Autowired
     public MapPointerDAOImpl(DataSource dataSource) {
