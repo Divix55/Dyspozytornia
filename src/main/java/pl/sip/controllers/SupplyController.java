@@ -92,6 +92,9 @@ public class SupplyController {
         String hour = ticket.getDeliveryDate().split(" ")[1];
 
         ArrayList<NewMapPointer> warehouses = pointerService.showStoreTable();
+
+        ticket.setShopName(ticketService.getShopsName(ticket.getShopId())); // TODO: [Hubert] na Boga, zmień to ._. // [Hubert] zmienię jak będzie czas
+        log.info(ticket.toString());
         NewMapPointer whereToDeliver = pointerService.getPointerByName(ticket.getShopName());
         boolean isDriverAlreadyPicked = false;
 
@@ -204,7 +207,6 @@ public class SupplyController {
     }
 
     private int checkAvailableDrivers(int storeId, double distance, String deliveryDate, String deliveryHour){
-        // TODO: something's not quite right here
         int[] drivers = ticketService.getDriversByStoreId(storeId);
         int deliveryDuration = SipFunctions.calculateDuration(distance);
         ArrayList<SupplyTicket> driversTickets = ticketService.getTicketsByDrivers(drivers);
