@@ -18,8 +18,10 @@ import pl.sip.utils.SipFunctions;
 import pl.sip.utils.SortByDistance;
 
 import javax.validation.Valid;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 @Controller
 public class SupplyController {
@@ -27,6 +29,8 @@ public class SupplyController {
     private final SupplyTicketService ticketService;
     private final MapPointerService pointerService;
     private Logger log = Logger.getLogger("SupplyController");
+
+    private final int MAX_TICKETS_PER_DRIVER = 3;
 
     @Autowired
     public SupplyController(SupplyTicketService ticketService, MapPointerService pointerService) {
@@ -50,6 +54,7 @@ public class SupplyController {
                     float shopLat = ticketService.getShopsLat(ticket.getShopId());
                     float storeLon = ticketService.getStoreLon(ticket.getStoreId());
                     float storeLat = ticketService.getStoreLat(ticket.getStoreId());
+
                     String htmlTag = "<tr><td>" + ticket.getTicketId() + "</td><td>" + shopName +
                             "</td><td style='display: none'>" + shopLon + "</td><td style='display: none'>" + shopLat +
                             "</td><td style='display: none'>" + storeLon + "</td><td style='display: none'>" + storeLat +
@@ -71,7 +76,7 @@ public class SupplyController {
     public String acceptDelivery(Model model){
         ArrayList<SupplyTicket> supplyTickets = ticketService.showTickets();
 
-        for (SupplyTicket ticket: supplyTickets){
+        /*for (SupplyTicket ticket: supplyTickets){
             if(ticket.getTicketStatus().equals("oczekujace")){
                 ticket.setTicketStatus("w realizacji");
 
@@ -80,11 +85,169 @@ public class SupplyController {
                 createTicketDataNaiveAlgorithm(ticket);
                 log.info("Po wyznaczeniu trasy");
             }
+        }*/
+
+        //create Distance map per not-started ticket
+        log.info("Przed wyznaczeniem trasy");
+        createTicketNewWay(supplyTickets);
+        log.info("Po wyznaczeniu trasy");
+
+        return showSupply(model);
+    }
+
+    private void createTicketNewWay(ArrayList<SupplyTicket> supplyTickets){
+
+        //struktura wygląda następująco:        Map< STORE_ID, Map< DISTANCE, Map< TICKET_ID_LIST, SHOP_ID_LIST( == PATH) >>>
+        Map<Integer, Map<Double, Map<ArrayList<Integer>, ArrayList<Integer>>>> finalDistanceMap = new HashMap<>();
+
+        List<NewMapPointer>allWarehouses = pointerService.showStoreTable();
+
+        ArrayList<SupplyTicket> nextFewTickets = new ArrayList<>();
+
+        int ticketCounter = 0;
+        for(SupplyTicket ticket: supplyTickets) {
+            log.info(ticket.toString());
+            if (!ticket.getTicketStatus().equals("oczekujace"))
+                continue;
+            if (ticketCounter == MAX_TICKETS_PER_DRIVER)
+                break;
+            nextFewTickets.add(ticket);
+            ticketCounter++;
         }
-        // TODO: distance algorithm goes here
-        //change their status
-        //send them back to db
-        return "supply";
+
+        log.info("" + nextFewTickets.size());
+
+
+        Map<Integer, Map<Double, Map<ArrayList<Integer>, ArrayList<Integer>>>> distanceMap = new HashMap<>();
+        for(NewMapPointer warehouse: allWarehouses){
+            log.info(warehouse.toString());
+            //map of <Distance, <[ticketIds] [path]>>
+            Map<Double, Map<ArrayList<Integer>, ArrayList<Integer>>> distance_path_map;
+            distance_path_map = calculateShortestDistanceAndPath(nextFewTickets, warehouse);
+
+            distanceMap.put(warehouse.getPointId(), distance_path_map);
+        }
+
+        double shortestDistance = 10000;
+        for(Map.Entry<Integer, Map<Double, Map<ArrayList<Integer>, ArrayList<Integer>>>> shortestPathPerWarehouse: distanceMap.entrySet()){
+            Integer warehouseId = shortestPathPerWarehouse.getKey();
+            Map<Double, Map<ArrayList<Integer>, ArrayList<Integer>>> distance_path_map = shortestPathPerWarehouse.getValue();
+            double distance = distance_path_map.entrySet().iterator().next().getKey();
+            if(distance < shortestDistance){
+                shortestDistance = distance;
+                finalDistanceMap = new HashMap<>();
+                finalDistanceMap.put(warehouseId, shortestPathPerWarehouse.getValue());
+            }
+        }
+
+        //TODO: [Hubert] ????? XDD
+        Map<ArrayList<Integer>, ArrayList<Integer>> sicketId_and_path =
+                finalDistanceMap.entrySet().iterator().next().getValue().entrySet().iterator().next().getValue();
+
+        ArrayList<Integer> ticketIdList = sicketId_and_path.entrySet().iterator().next().getKey();
+        ArrayList<Integer> pathList = sicketId_and_path.entrySet().iterator().next().getValue();
+
+        //TODO: checkAvailableDrivers based on calculated duration
+        for(int n = 0; n < MAX_TICKETS_PER_DRIVER; n++){
+            Integer shopId = pathList.get(n);
+            Integer ticketId = ticketIdList.get(n);
+            SupplyTicket ticket = new SupplyTicket();
+            ticket.setShopId(shopId);
+            ticket.setTicketId(ticketId);
+            ticket.setShopName(ticketService.getShopsName(shopId));
+            ticket.setTicketStatus("w realizacji");
+            //to powinno brać odległość
+            double distance = finalDistanceMap.entrySet().iterator().next().getValue().entrySet().iterator().next().getKey();
+            ticket.setDuration(SipFunctions.calculateDuration(distance));
+            ticket.setDistance(distance);
+            ticket.setDriverId(1);
+            ticket.setStoreId(finalDistanceMap.entrySet().iterator().next().getKey());
+            ticket.setDeliveryDate("date");
+            //TODO: Można tutaj dodać jeszcze pole do tabeli z trasą - trasa znajduje się w zmiennej `pathList`
+            log.info("Updating: ");
+            log.info(ticket.toString());
+            ticketService.createTicketNew(ticket);
+        }
+    }
+
+    private Map<Double, Map<ArrayList<Integer>, ArrayList<Integer>>> calculateShortestDistanceAndPath(ArrayList<SupplyTicket> tickets,
+                                                                              NewMapPointer warehouse){
+        Map<Double, Map<ArrayList<Integer>, ArrayList<Integer>>> distance_path_map = new HashMap<>();
+
+        ArrayList<Integer> shortestDeliveryPath = new ArrayList<>();
+        ArrayList<Integer> ticketIds = new ArrayList<>();
+        double shortestDistance = 1000;
+        for(SupplyTicket ticket: tickets){
+            ticketIds.add(ticket.getTicketId());
+
+            ArrayList<Integer> deliveryPath = new ArrayList<>();
+
+            String shopName = ticketService.getShopsName(ticket.getShopId());
+            NewMapPointer shop1 = pointerService.getPointerByName(shopName);
+            log.info(":x");
+            log.info(shop1.toString());
+            log.info(warehouse.toString());
+            double distance = SipFunctions.calculateDistanceInStraightLine(warehouse, shop1);
+            deliveryPath.add(shop1.getPointId());
+
+            SupplyTicket ticket2 = new SupplyTicket();
+            SupplyTicket ticket3 = new SupplyTicket();
+            // TODO: [Hubert] O panie, kolejny rak ._.
+            // TODO: trzeba zrobić to jakoś fajnie dynamicznie - może jakaś oddzielna funkcja?
+            if (tickets.get(0) == ticket){
+                //pobieram id jednego z pozostałych ticketów, a potem wyznaczam na podstawie ID nazwę, żeby potem na
+                // podstawie nazwy obliczyć odległość
+                ticket2 = tickets.get(1);
+                ticket3 = tickets.get(2);
+            }
+            else if (tickets.get(1) == ticket){
+                ticket2 = tickets.get(0);
+                ticket3 = tickets.get(2);
+            }
+            else{
+                ticket2 = tickets.get(0);
+                ticket3 = tickets.get(1);
+            }
+            String shopName2 = ticketService.getShopsName(ticket2.getShopId());
+            String shopName3 = ticketService.getShopsName(ticket3.getShopId());
+
+            NewMapPointer shop2 = pointerService.getPointerByName(shopName2);
+            NewMapPointer shop3 = pointerService.getPointerByName(shopName3);
+
+            double distance2 = SipFunctions.calculateDistanceInStraightLine(shop1, shop2);
+            double distance3 = SipFunctions.calculateDistanceInStraightLine(shop1, shop3);
+
+            double closer = Math.min(distance2, distance3);
+
+            distance += closer;
+
+            distance += SipFunctions.calculateDistanceInStraightLine(shop2, shop3);
+            NewMapPointer lastShop = new NewMapPointer();
+            if(distance2 == closer) {
+                lastShop = shop3;
+                deliveryPath.add(shop2.getPointId());
+                deliveryPath.add(shop3.getPointId());
+            }
+            else {
+                lastShop = shop2;
+                deliveryPath.add(shop3.getPointId());
+                deliveryPath.add(shop2.getPointId());
+            }
+
+            distance += SipFunctions.calculateDistanceInStraightLine(lastShop, warehouse);
+
+            if(distance < shortestDistance){
+                shortestDistance = distance;
+                shortestDeliveryPath = deliveryPath;
+            }
+        }
+        Map<ArrayList<Integer>, ArrayList<Integer>> tickets_and_path = new HashMap<>();
+        tickets_and_path.put(ticketIds, shortestDeliveryPath);
+
+        distance_path_map.put(shortestDistance, tickets_and_path);
+
+        return distance_path_map;
+
     }
 
     private void createTicketDataNaiveAlgorithm(SupplyTicket ticket){
@@ -208,7 +371,7 @@ public class SupplyController {
 
     private int checkAvailableDrivers(int storeId, double distance, String deliveryDate, String deliveryHour){
         int[] drivers = ticketService.getDriversByStoreId(storeId);
-        int deliveryDuration = SipFunctions.calculateDuration(distance);
+        double deliveryDuration = SipFunctions.calculateDuration(distance);
         ArrayList<SupplyTicket> driversTickets = ticketService.getTicketsByDrivers(drivers);
         for(int driver: drivers){
             boolean ifAvailableForDelivery = checkAvailability(driver, driversTickets, deliveryDate, deliveryHour, deliveryDuration);
@@ -224,7 +387,7 @@ public class SupplyController {
                                              ArrayList<SupplyTicket> driversTickets,
                                              String deliveryDate,
                                              String deliveryHour,
-                                             int deliveryDuration) {
+                                             double deliveryDuration) {
         for(SupplyTicket ticket: driversTickets){
             if (ticket.getDriverId() == driverId){
                 String ticketFullDate = ticket.getDeliveryDate().split(" ")[0];

@@ -43,7 +43,7 @@ create table if not exists Supply (
   ShopName varchar(255) not null,
   DriverId int,
   DeliveryDate varchar(255) not null,
-  DurationTime int,
+  DurationTime double,
   Status varchar(15) not null default 'oczekujace',
   isCompleted Boolean not null,
   foreign key (StoreId) references Stores(StoreId),

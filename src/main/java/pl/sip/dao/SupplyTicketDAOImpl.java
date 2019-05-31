@@ -109,7 +109,7 @@ public class SupplyTicketDAOImpl implements SupplyTicketDAO {
             preparedStatement.setInt(1, storeId);
             preparedStatement.setInt(2, driverId);
             preparedStatement.setString(3, ticket.getDeliveryDate());
-            preparedStatement.setInt(4, ticket.getDuration());
+            preparedStatement.setDouble(4, ticket.getDuration());
             preparedStatement.setString(5, ticket.getTicketStatus());
             preparedStatement.setInt(6, ticket.getTicketId());
             preparedStatement.execute();
@@ -298,6 +298,40 @@ public class SupplyTicketDAOImpl implements SupplyTicketDAO {
             }
         }
         return tickets;
+    }
+
+    @Override
+    public void createTicketNew(SupplyTicket ticket) {
+        String sql = "update Supply set StoreId = ?, DriverId = ?, DeliveryDate = ?, DurationTime = ?, Status = ? where SupplyId = ?";
+
+        int storeId = ticket.getStoreId();
+        int driverId = ticket.getDriverId();
+
+        Connection connection = null;
+
+        try {
+            connection = dataSource.getConnection();
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, storeId);
+            preparedStatement.setInt(2, driverId);
+            preparedStatement.setString(3, ticket.getDeliveryDate());
+            preparedStatement.setDouble(4, ticket.getDuration());
+            preparedStatement.setString(5, ticket.getTicketStatus());
+            preparedStatement.setInt(6, ticket.getTicketId());
+            preparedStatement.execute();
+            connection.close();
+        } catch (SQLException e){
+            throw new RuntimeException(e);
+        } finally {
+            if(connection != null){
+                try {
+                    connection.close();
+                } catch (SQLException e){
+                    System.out.print("Exception in closing connection!");
+                }
+            }
+        }
     }
 
     private int checkSize(String tableName) {
