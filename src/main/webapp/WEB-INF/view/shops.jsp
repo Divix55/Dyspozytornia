@@ -13,9 +13,13 @@
             <div class="col-sm-12 mainText">
                 <table>
                     <tr>
-                        <th>Nazwa punktu</th>
-                        <th>Szerokosc geogr.</th>
-                        <th>Dlugosc geogr.</th>
+                        <th style="width: 10%"> Nazwa punktu </th>
+                        <th style="display:none">Szerokosc geogr.</th>
+                        <th style="display:none">Dlugosc geogr.</th>
+                        <th> NIP </th>
+                        <th> Miasto </th>
+                        <th> Adres </th>
+                        <th> Lokal </th>
                     </tr>
                     ${mapPointerFill}
                 </table>
