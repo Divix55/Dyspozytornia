@@ -56,4 +56,9 @@ public class SupplyTicketServiceImpl implements SupplyTicketService {
     public ArrayList<SupplyTicket> getTicketsByDrivers(int[] drivers) {
         return supplyTicketDAO.getTicketsByDrivers(drivers);
     }
+
+    @Override
+    public void createTicketNew(SupplyTicket ticket) {
+        this.supplyTicketDAO.createTicketNew(ticket);
+    }
 }

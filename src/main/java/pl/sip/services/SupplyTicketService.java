@@ -15,4 +15,6 @@ public interface SupplyTicketService {
     float getStoreLon(int storeId);
     int[] getDriversByStoreId(int storeId);
     ArrayList<SupplyTicket> getTicketsByDrivers(int[] drivers);
+
+    void createTicketNew(SupplyTicket ticket);
 }
