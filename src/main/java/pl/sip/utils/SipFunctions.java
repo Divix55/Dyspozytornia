@@ -8,8 +8,8 @@ public class SipFunctions {
     private static final double SPEED_FACTOR = 1.2;
     private static Logger log = Logger.getLogger("SipFunctions");
 
-    public static int calculateDuration(double distance) {
-        return (int) Math.round(distance*SPEED_FACTOR);
+    public static double calculateDuration(double distance) {
+        return distance*SPEED_FACTOR * 1000d / 1000d;
     }
 
     public static String tryNextHour(String date, String h) {
