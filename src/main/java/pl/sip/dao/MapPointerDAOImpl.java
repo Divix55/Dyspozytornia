@@ -24,7 +24,7 @@ public class MapPointerDAOImpl implements MapPointerDAO {
     }
 
     public ArrayList<NewMapPointer> createStoreTable(){
-        String sql = "select StoreId, Name, Longitude, Latitude from Stores";
+        String sql = "select StoreId, Name, NIP, City, Street, HomeNumber, Longitude, Latitude from Stores";
         Connection connection = null;
         ArrayList<NewMapPointer> listOfPointers = new ArrayList<>();
 
@@ -36,6 +36,10 @@ public class MapPointerDAOImpl implements MapPointerDAO {
                 NewMapPointer newPoint = new NewMapPointer();
                 newPoint.setPointId(resultSet.getInt("StoreId"));
                 newPoint.setPointName(resultSet.getString("Name"));
+                newPoint.setNip(resultSet.getString("NIP"));
+                newPoint.setPointCity(resultSet.getString("City"));
+                newPoint.setPointAddress(resultSet.getString("Street"));
+                newPoint.setPointAddressBlockNumber(resultSet.getString("HomeNumber"));
                 newPoint.setPointLongitude(resultSet.getDouble("Longitude"));
                 newPoint.setPointLatitude(resultSet.getDouble("Latitude"));
                 listOfPointers.add(newPoint);
@@ -60,9 +64,9 @@ public class MapPointerDAOImpl implements MapPointerDAO {
     public void createMapPointer(NewMapPointer mapPointer, String typeOfPoint) {
         String sql = "";
         if (typeOfPoint.equals("Stores")) {
-            sql = "Insert into Stores (Name, Longitude, Latitude)" + "values(?, ?, ?)";
+            sql = "Insert into Stores (Name, NIP, City, Street, HomeNumber, Longitude, Latitude)" + "values(?, ?, ?, ?, ?, ?, ?)";
         } else if (typeOfPoint.equals("Shops")){
-            sql = "Insert into Shops (Name, Longitude, Latitude)" + "values(?, ?, ?)";
+            sql = "Insert into Shops (Name, NIP, City, Street, HomeNumber, Longitude, Latitude)" + "values(?, ?, ?, ?, ?, ?, ?)";
         }
         Connection connection = null;
 
@@ -70,8 +74,12 @@ public class MapPointerDAOImpl implements MapPointerDAO {
             connection = dataSource.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, mapPointer.getPointName());
-            preparedStatement.setDouble(2, mapPointer.getPointLongitude());
-            preparedStatement.setDouble(3, mapPointer.getPointLatitude());
+            preparedStatement.setString(2, mapPointer.getNip());
+            preparedStatement.setString(3, mapPointer.getPointCity());
+            preparedStatement.setString(4, mapPointer.getPointAddress());
+            preparedStatement.setString(5, mapPointer.getPointAddressBlockNumber());
+            preparedStatement.setDouble(6, mapPointer.getPointLongitude());
+            preparedStatement.setDouble(7, mapPointer.getPointLatitude());
             preparedStatement.execute();
             connection.close();
         } catch (SQLException e){
@@ -124,7 +132,7 @@ public class MapPointerDAOImpl implements MapPointerDAO {
 
 
     public ArrayList<NewMapPointer> createShopTable(){
-        String sql = "select ShopId, Name, Longitude, Latitude from Shops";
+        String sql = "select ShopId, Name, NIP, City, Street, HomeNumber, Longitude, Latitude from Shops";
         Connection connection = null;
         ArrayList<NewMapPointer> listOfPointers = new ArrayList<>();
 
@@ -136,6 +144,10 @@ public class MapPointerDAOImpl implements MapPointerDAO {
                 NewMapPointer newPoint = new NewMapPointer();
                 newPoint.setPointId(resultSet.getInt("ShopId"));
                 newPoint.setPointName(resultSet.getString("Name"));
+                newPoint.setNip(resultSet.getString("NIP"));
+                newPoint.setPointCity(resultSet.getString("City"));
+                newPoint.setPointAddress(resultSet.getString("Street"));
+                newPoint.setPointAddressBlockNumber(resultSet.getString("HomeNumber"));
                 newPoint.setPointLongitude(resultSet.getDouble("Longitude"));
                 newPoint.setPointLatitude(resultSet.getDouble("Latitude"));
                 listOfPointers.add(newPoint);
