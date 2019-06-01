@@ -20,6 +20,11 @@
                         </div>
                         <div class="form-group">
                             <div class="col-10 col-sm-8 col-md-6 col-lg-4 col-centered">
+                                <form:input path="nip" cssClass="form-control" placeholder="NIP"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-10 col-sm-8 col-md-6 col-lg-4 col-centered">
                                 <form:input path="pointCity" cssClass="form-control" placeholder="Miasto"/>
                             </div>
                         </div>

@@ -44,9 +44,18 @@ public class SupplyController {
         StringBuilder tableFill = new StringBuilder("Obecnie nie mamy zadnych zamowien");
 
         if( !supplyTickets.isEmpty() ) {
-            tableFill = new StringBuilder("<table id='tabela_dostawy'><tr><th>Numer zamowienia</th><th>Nazwa sklepu" +
-                    "</th><th style='display: none'>Lon</th><th style='display: none'>Lat</th><th>Store Id</th><th>" +
-                    "Driver Id</th><th>Czas trwania</th><th>Status</th><th>Oczekiwana data dostawy</th></tr>\n");
+            tableFill = new StringBuilder("<table id='tabela_dostawy'>" +
+                    "<tr>" +
+                    "<th style=\"width: 10%\">Numer zamowienia</th>" +
+                    "<th>Nazwa sklepu" + "</th>" +
+                    "<th style='display: none'>Lon</th>" +
+                    "<th style='display: none'>Lat</th>" +
+                    "<th>Store Id</th>" +
+                    "<th>Driver Id</th>" +
+                    "<th>Czas trwania</th>" +
+                    "<th>Status</th>" +
+                    "<th>Oczekiwana data dostawy</th>" +
+                    "</tr>\n");
             for (SupplyTicket ticket : supplyTickets) {
                 if (!ticket.isCompleted()) {
                     String shopName = ticketService.getShopsName(ticket.getShopId());
