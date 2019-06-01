@@ -1,120 +1,224 @@
 use sipdb;
 
 create user 'sipAccessUser'@'localhost' identified with mysql_native_password by
-  'sip';
+    'sip';
 
 grant all privileges on *.* to 'sipAccessUser'@'localhost';
 
+
+//===================================================================================================================
+// TWORZENIE TABEL
+//===================================================================================================================
 create table if not exists Stores (
-  StoreId int not null auto_increment primary key,
-  Name varchar(255) not null,
-  Longitude float not null,
-  Latitude float not null);
+                                      StoreId int not null auto_increment primary key,
+                                      Name varchar(255) not null,
+                                      Longitude float not null,
+                                      Latitude float not null,
+                                      NIP varchar(10) not null,
+                                      City varchar(255) not null,
+                                      Street varchar(255) not null,
+                                      HomeNumber varchar(20) not null);
 
 create table if not exists Users (
-  UserId int not null auto_increment primary key,
-  StoreId int not null,
-  UserName varchar(255) not null,
-  FirstName varchar(255) not null,
-  LastName varchar(255) not null,
-  Email varchar(255) not null,
-  UserPassword varchar(255) not null,
-  Privileges int(1) not null default 1,
-  foreign key (StoreId) references Stores(StoreId));
+                                     UserId int not null auto_increment primary key,
+                                     StoreId int not null,
+                                     UserName varchar(255) not null,
+                                     FirstName varchar(255) not null,
+                                     LastName varchar(255) not null,
+                                     Email varchar(255) not null,
+                                     UserPassword varchar(255) not null,
+                                     Privileges int(1) not null default 1,
+                                     foreign key (StoreId) references Stores(StoreId));
 
 create table if not exists Shops (
-  ShopId int not null auto_increment primary key,
-  Name varchar(255) not null,
-  Longitude float not null,
-  Latitude float not null);
+                                     ShopId int not null auto_increment primary key,
+                                     Name varchar(255) not null,
+                                     Longitude float not null,
+                                     Latitude float not null,
+                                     NIP varchar(10) not null,
+                                     City varchar(255) not null,
+                                     Street varchar(255) not null,
+                                     HomeNumber varchar(20) not null);
 
 create table if not exists Drivers (
-  DriverId int not null auto_increment primary key,
-  StoreId int not null,
-  FirstName varchar(255) not null,
-  LastName varchar(255) not null,
-  foreign key (StoreId) references Stores(StoreId)
-);
+                                       DriverId int not null auto_increment primary key,
+                                       StoreId int not null,
+                                       FirstName varchar(255) not null,
+                                       LastName varchar(255) not null,
+                                       MaxCap int not null default 40,
+                                       foreign key (StoreId) references Stores(StoreId));
 
 create table if not exists Supply (
-  SupplyId int not null auto_increment primary key,
-  StoreId int,
-  ShopId int not null,
-  ShopName varchar(255) not null,
-  DriverId int,
-  DeliveryDate varchar(255) not null,
-  DurationTime double,
-  Status varchar(15) not null default 'oczekujace',
-  isCompleted Boolean not null,
-  foreign key (StoreId) references Stores(StoreId),
-  foreign key (ShopId) references Shops(ShopId),
-  foreign key (DriverId) references Drivers(DriverId)
+                                      SupplyId int not null auto_increment primary key,
+                                      StoreId int,
+                                      ShopId int not null,
+                                      ShopName varchar(255) not null,
+                                      DriverId int,
+                                      DeliveryDate varchar(255) not null,
+                                      DurationTime int,
+                                      Status varchar(15) not null default 'oczekujace',
+                                      isCompleted Boolean not null,
+                                      foreign key (StoreId) references Stores(StoreId),
+                                      foreign key (ShopId) references Shops(ShopId),
+                                      foreign key (DriverId) references Drivers(DriverId)
 );
+//===================================================================================================================
 
+
+
+//===================================================================================================================
+// WYSWIETLANIE TABEL
+//===================================================================================================================
 select * from Stores;
 select * from Users;
 select * from Shops;
 select * from Drivers;
 select * from Supply;
+//===================================================================================================================
 
+
+
+//===================================================================================================================
+// USUWANIE TABEL
+//===================================================================================================================
+drop table Stores;
+drop table Users;
+drop table Shops;
+drop table Drivers;
+drop table Supply;
+//===================================================================================================================
+
+
+
+//===================================================================================================================
+// DODAWANIE DANYCH
+//===================================================================================================================
+// Magazyny
+//=========
+insert into Stores (Name, Longitude, Latitude, NIP, City, Street, HomeNumber)
+    value ('Magazyn Gumed','54.3670', '18.6243', '4569878502', 'Gdansk', 'Sklodowskiej', '3a');
+
+insert into Stores (Name, Longitude, Latitude, NIP, City, Street, HomeNumber)
+    value ('Magazyn UG', '54.3961', '18.5771', '4560103492', 'Gdansk', 'Bazynskiego', '8');
+
+insert into Stores (Name, Longitude, Latitude, NIP, City, Street, HomeNumber)
+    value ('Magazyn ASP', '54.350675', '18.649077', '9016734652', 'Gdansk', 'Targ Weglowy', '6');
+
+//===================================================================================================================
+// Sklepy
+//=========
+insert into Shops (Name, Longitude, Latitude, NIP, City, Street, HomeNumber)
+    value ('Sklep1', '0', '0', '0000000000', 'City', 'Street', '0');
+
+insert into Shops (Name, Longitude, Latitude, NIP, City, Street, HomeNumber)
+    value ('Sklep2', '0', '0', '0000000000', 'City', 'Street', '0');
+
+insert into Shops (Name, Longitude, Latitude, NIP, City, Street, HomeNumber)
+    value ('Sklep3', '0', '0', '0000000000', 'City', 'Street', '0');
+
+insert into Shops (Name, Longitude, Latitude, NIP, City, Street, HomeNumber)
+    value ('Madison', '54.3560', '18.6495', '9638741256', 'Gdansk', 'Rajska', '10');
+
+insert into Shops (Name, Longitude, Latitude, NIP, City, Street, HomeNumber)
+    value ('Morena', '54.3523', '18.5919', '4567451893', 'Gdansk', 'Shuberta', '102a');
+
+insert into Shops (Name, Longitude, Latitude, NIP, City, Street, HomeNumber)
+    value ('Forum', '54.349479', '18.642372', '8746521212', 'Gdansk','Targ Sienny', '7');
+
+insert into Shops (Name, Longitude, Latitude, NIP, City, Street, HomeNumber)
+    value ('Metropolia', '54.382704', '18.605363', '4646442525', 'Gdansk', 'Kilinskiego', '4');
+
+insert into Shops (Name, Longitude, Latitude, NIP, City, Street, HomeNumber)
+    value ('Zaspa', '54.389725', '18.609937', '1117896521', 'Gdansk', 'Rzeczypospolitej', '33');
+
+insert into Shops (Name, Longitude, Latitude, NIP, City, Street, HomeNumber)
+    value ('Chelm', '54.336910', '18.620270', '6563214599', 'Gdansk', 'Cienista', '30');
+
+insert into Shops (Name, Longitude, Latitude, NIP, City, Street, HomeNumber)
+    value ('Gdanska', '54.348588', '18.652521', '4542321212', 'Gdansk', 'Dluga', '44');
+
+insert into Shops (Name, Longitude, Latitude, NIP, City, Street, HomeNumber)
+    value ('Energa Stadion', '54.390090', '18.640667', '7898524197', 'Gdansk', 'Pokolen Lechii Gdansk', '1');
+
+//===================================================================================================================
+// Uzytkownicy
+//=========
+insert into Users (StoreId, UserName, FirstName, LastName, Email, UserPassword, Privileges)
+    value ('1','admin', 'Admin', 'AdminLast', 'admin@admin.com', 'admin', '2');
+
+//===================================================================================================================
+// Kierowcy
+//=========
+insert into Drivers (StoreId, FirstName, LastName, MaxCap)
+    value ('1', 'Fred', 'Lewy', 40);
+
+insert into Drivers (StoreId, FirstName, LastName, MaxCap)
+    value ('1', 'Dzordz', 'Prawy', 20);
+
+insert into Drivers (StoreId, FirstName, LastName, MaxCap)
+    value ('2', 'Janek', 'Górny', 70);
+
+insert into Drivers (StoreId, FirstName, LastName, MaxCap)
+    value ('2', 'Pawel', 'Dolny', 40);
+
+insert into Drivers (StoreId, FirstName, LastName, MaxCap)
+    value ('3', 'Tomek', 'Kowalski', 70);
+
+insert into Drivers (StoreId, FirstName, LastName, MaxCap)
+    value ('3', 'Maciej', 'Jakis', 40);
+
+//===================================================================================================================
+// Dostawy
+//=========
+insert into Supply (StoreId, ShopId, ShopName, DriverId, DeliveryDate, DurationTime, Status, isCompleted)
+    value (1, 7, 'Metropolia', 1, '2019-5-7 14:00', 2, 'zrealizowane', 1);
+
+insert into Supply (StoreId, ShopId, ShopName, DriverId, DeliveryDate, DurationTime, Status, isCompleted)
+    value (1, 1, 'Baltycka', 1, '2019-5-7 14:00', 1, 'w realizacji', 0);
+
+insert into Supply (StoreId, ShopId, ShopName, DriverId, DeliveryDate, DurationTime, Status, isCompleted)
+    value (1, 2, 'Alfa', 1, '2019-6-3 10:00', 1, 'oczekujace', 0);
+
+//===================================================================================================================
+
+
+
+
+//===================================================================================================================
+// UPDATEY
+//===================================================================================================================
+// Sklepy
+//=========
+update Shops
+set Name = 'Baltycka', Longitude = '54.3831', Latitude = '18.5993', NIP = '9874563210', City = 'Gdansk', Street = 'Grunwaldzka', HomeNumber = '141'
+where ShopId = 1;
+
+update Shops
+set Name = 'Alfa', Longitude = '54.4039',Latitude = '18.5865', NIP = '4569851212', City = 'Gdansk', Street = 'Kolobrzeska', HomeNumber = '41c'
+where ShopId = 2;
+
+update Shops
+set Name = 'Przymorze', Longitude = '54.4094',Latitude = '18.5942', NIP = '3212028974', City = 'Gdansk', Street = 'Obroncow Wybrzeza', HomeNumber = '1'
+where ShopId = 3;
+//===================================================================================================================
+
+
+
+//===================================================================================================================
+// INNE
+//===================================================================================================================
 desc Stores;
 desc Users;
 desc Shops;
 desc Drivers;
 desc Supply;
+//===================================================================================================================
 
-insert into Stores (Name, Longitude, Latitude)
-value ('Magazyn1', '0', '0');
 
-insert into Stores (Name, Longitude, Latitude)
-value ('Magazyn2', '1', '1');
 
-insert into Users (StoreId, UserName, FirstName, LastName, Email, UserPassword, Privileges)
-value ('1','admin', 'Admin', 'AdminLast', 'admin@admin.com', 'admin', '2');
-
-insert into Shops (Name, Longitude, Latitude)
-value ('Sklep1', '0', '0');
-
-insert into Shops (Name, Longitude, Latitude)
-value ('Sklep2', '0', '0');
-
-insert into Shops (Name, Longitude, Latitude)
-value ('Sklep3', '0', '0');
-
-insert into Drivers (StoreId, FirstName, LastName)
-value ('1', 'Fred', 'Lewy');
-
-insert into Drivers (StoreId, FirstName, LastName)
-value ('1', 'Dżordż', 'Prawy');
-
-insert into Drivers (StoreId, FirstName, LastName)
-value ('2', 'Janek', 'Górny');
-
-insert into Drivers (StoreId, FirstName, LastName)
-value ('2', 'Paweł', 'Dolny');
-
-update shops
-set Name = 'Baltycka', Longitude = '54.3831', Latitude = '18.5993'
-where ShopId = 1;
-
-update shops
-set Name = 'Alfa', Longitude = '54.4039',Latitude = '18.5865'
-where ShopId = 2;
-
-update shops
-set Name = 'Przymorze', Longitude = '54.4094',Latitude = '18.5942'
-where ShopId = 3;
-
-insert into Shops (Name, Longitude, Latitude)
-value ('Madison', '54.3560', '18.6495');
-
-insert into Shops (Name, Longitude, Latitude)
-value ('Morena', '54.3523', '18.5919');
-
-update stores
-set Name = 'Magazyn Gumed', Longitude = '54.3670', Latitude = '18.6243'
-where StoreId = 1;
-
-update stores
-set Name = 'Magazyn UG', Longitude = '54.3961', Latitude = '18.5771'
-where StoreId = 2;
+//===================================================================================================================
+// USTAWIENI MaxCap dla Kierowcow - tylko do aktualizacji bazy
+//===================================================================================================================
+ALTER TABLE Drivers
+    ADD COLUMN MaxCap int AFTER LastName;
+//===================================================================================================================
