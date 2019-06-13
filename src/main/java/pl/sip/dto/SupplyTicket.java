@@ -18,7 +18,7 @@ public class SupplyTicket {
     private String shopHour;
     private String shopMinute;
     private double distance;
-    private int duration;
+    private double duration;
     private Logger log = Logger.getLogger("SupplyTicket");
 
     public SupplyTicket() {
@@ -134,11 +134,11 @@ public class SupplyTicket {
         this.shopMinute = shopMinute;
     }
 
-    public int getDuration() {
+    public double getDuration() {
         return duration;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(double duration) {
         this.duration = duration;
     }
 
@@ -159,6 +159,6 @@ public class SupplyTicket {
     public String toString(){
         return "TicketId: " + ticketId + " |StoreId: " + storeId + " |ShopId: " + shopId + " |ShopName: " + shopName + " |DriverId: " + driverId +
                 " |DeliveryDate: " + deliveryDate + " |Lon: " + shopLon + " |Lat: " + shopLat + " |Dist: " + distance +
-                " |Duration: " + duration;
+                " |Duration: " + duration + " |Status: " + ticketStatus;
     }
 }

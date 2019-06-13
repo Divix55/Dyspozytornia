@@ -90,6 +90,11 @@ public class NewMapPointer {
         this.pointLatitude = latitude;
     }
 
+    @Override
+    public String toString(){
+        return "ID: " + pointId + " Name: " + pointName + " Lon: " + pointLongitude + " Lat: " + pointLatitude;
+    }
+
     public boolean equals(NewMapPointer pointer){
         return getPointLongitude() == pointer.getPointLongitude() && getPointLatitude() == pointer.getPointLatitude();
     }
